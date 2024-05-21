@@ -51,9 +51,9 @@ echo "Validating: $(cd "$(dirname "$VALIDATE_PATH")"; pwd)/$(basename "$VALIDATE
 
 echo "Validating Formatting"
 if [[ $LANGUAGE == "python" ]]; then
-    echo "Checking isort, black"
-    isort --check ${VALIDATE_PATH}
-    black --check ${VALIDATE_PATH}
+    echo "Running ruff"
+    ruff format ${FIX_PATH}
+    ruff check --fix ${FIX_PATH}
 elif [[ $LANGUAGE == "typescript" ]]; then
     echo "Checking prettier"
     npx prettier -c ${VALIDATE_PATH}
