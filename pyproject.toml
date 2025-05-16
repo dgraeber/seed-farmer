@@ -96,3 +96,9 @@ omit = [
 
 [tool.coverage.report]
 fail_under = 80.0
+
+[[tool.uv.index]]
+name = "local"
+url = "http://localhost:8888/simple/"
+publish-url = "http://localhost:8888/"
+explicit = true
