@@ -14,3 +14,23 @@
   color: #000 !important;
   fill: #000 !important;
 }
+
+.md-nav__link {
+  color: #6db7dc !important;
+  fill: #000 !important;
+}
+
+.md_ellipsis {
+  color: #6db7dc !important;
+  fill: #000 !important;
+}
+
+/* Fix anchor/permalink links color */
+.md-typeset .headerlink {
+  color: #6db7dc !important;
+}
+
+.md-typeset .headerlink:hover,
+.md-typeset .headerlink:focus {
+  color: #cc404a !important;
+}

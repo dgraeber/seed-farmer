@@ -6,18 +6,35 @@ This guide will walk you through the process of installing Seed-Farmer and its d
 
 Before installing Seed-Farmer, ensure you have the following prerequisites:
 
-- Python 3.9 or later
+- Python 3.9 or later (preferably later)
 - AWS CLI configured with appropriate credentials
 - AWS CDK (for CDK-based modules)
 
 ## Installing Seed-Farmer
+
+Seed-Farmer uses uv to install.  It is recommended to [install](https://docs.astral.sh/uv/getting-started/installation/) uv and use that as the primary installation tool. 
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+
+### Using uv
+
+Install Seed-Farmer as a tool.
+
+```bash
+uv tool install seed-farmer 
+
+```
+You can pin to a particular version by referring to the version in the install ( see the [pypi release history](https://pypi.org/project/seed-farmer/#history) )
 
 ### Using pip
 
 The recommended way to install Seed-Farmer is using pip:
 
 ```bash
-pip install seed-farmer
+uv pip install seed-farmer
 ```
 
 ### From Source
@@ -27,7 +44,7 @@ You can also install Seed-Farmer from source:
 ```bash
 git clone https://github.com/awslabs/seed-farmer.git
 cd seed-farmer
-pip install -e .
+uv pip install -e .
 ```
 
 ## Verifying the Installation

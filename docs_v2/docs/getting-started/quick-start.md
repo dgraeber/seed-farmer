@@ -18,9 +18,7 @@ Before you begin, make sure you have:
 First, create a Python virtual environment and install Seed-Farmer:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install seed-farmer
+uv tool install seed-farmer
 ```
 
 Then, bootstrap your AWS CDK environment:
