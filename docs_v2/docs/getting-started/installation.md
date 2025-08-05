@@ -1,0 +1,83 @@
+# Installation
+
+This guide will walk you through the process of installing Seed-Farmer and its dependencies.
+
+## Prerequisites
+
+Before installing Seed-Farmer, ensure you have the following prerequisites:
+
+- Python 3.9 or later
+- AWS CLI configured with appropriate credentials
+- AWS CDK (for CDK-based modules)
+
+## Installing Seed-Farmer
+
+### Using pip
+
+The recommended way to install Seed-Farmer is using pip:
+
+```bash
+pip install seed-farmer
+```
+
+### From Source
+
+You can also install Seed-Farmer from source:
+
+```bash
+git clone https://github.com/awslabs/seed-farmer.git
+cd seed-farmer
+pip install -e .
+```
+
+## Verifying the Installation
+
+To verify that Seed-Farmer is installed correctly, run:
+
+```bash
+seedfarmer --version
+```
+
+This should display the version of Seed-Farmer that you have installed.
+
+## Setting Up Your Environment
+
+### AWS Credentials
+
+Seed-Farmer uses the AWS credentials configured in your environment. You can configure these using the AWS CLI:
+
+```bash
+aws configure
+```
+
+Alternatively, you can set the following environment variables:
+
+```bash
+export AWS_ACCESS_KEY_ID=your-access-key
+export AWS_SECRET_ACCESS_KEY=your-secret-key
+export AWS_REGION=your-region
+```
+
+### AWS CDK
+
+If you're using CDK-based modules, you'll need to install the AWS CDK:
+
+```bash
+npm install -g aws-cdk
+```
+
+And bootstrap your AWS environment:
+
+```bash
+cdk bootstrap aws://ACCOUNT-NUMBER/REGION
+```
+
+Replace `ACCOUNT-NUMBER` with your AWS account number and `REGION` with your AWS region.
+
+## Next Steps
+
+Now that you have Seed-Farmer installed, you can:
+
+- Follow the [Quick Start](quick-start.md) guide to deploy your first project
+- Learn how to [bootstrap](bootstrapping.md) your AWS accounts for Seed-Farmer
+- Explore the [core concepts](../concepts/index.md) behind Seed-Farmer

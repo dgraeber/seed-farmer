@@ -1,0 +1,10 @@
+
+mkdocs build
+
+mkdocs serve
+
+
+.venv-dspy had mkdocs installed
+
+https://squidfunk.github.io/mkdocs-material/
+

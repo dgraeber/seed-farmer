@@ -1,0 +1,16 @@
+:root {
+  --md-primary-fg-color: 	#6096b1;
+  --md-accent-fg-color: #A5D6A7; 
+}
+
+.md-header, .md-header__title, .md-header__topic {
+  color: #000 !important;
+}
+.md-tabs, .md-tabs__link, .md-tabs__item {
+  color: #000 !important;
+}
+
+.md-search__icon {
+  color: #000 !important;
+  fill: #000 !important;
+}

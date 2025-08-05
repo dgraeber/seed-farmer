@@ -1,0 +1,207 @@
+# Bootstrapping Accounts
+
+Before you can use Seed-Farmer to deploy resources, you need to bootstrap your AWS accounts. This guide explains how to bootstrap your toolchain and target accounts.
+
+## Account Types
+
+Seed-Farmer uses two types of accounts:
+
+- **Toolchain Account**: The primary account that stores deployment metadata and coordinates deployments
+- **Target Account(s)**: The account(s) where modules are actually deployed
+
+You must have only one toolchain account bootstrapped and at least one target account bootstrapped. The account that is the toolchain account can also be bootstrapped as a target account.
+
+## Bootstrap Toolchain Account
+
+The `seedfarmer bootstrap toolchain` command sets up the toolchain account with the necessary IAM roles and permissions.
+
+```bash
+seedfarmer bootstrap toolchain \
+  --project PROJECT_NAME \
+  --trusted-principal PRINCIPAL_ARN \
+  [--permissions-boundary BOUNDARY_ARN] \
+  [--as-target] \
+  [--synth] \
+  [--profile PROFILE] \
+  [--region REGION] \
+  [--qualifier QUALIFIER] \
+  [--role-prefix ROLE_PREFIX] \
+  [--policy-prefix POLICY_PREFIX] \
+  [--policy-arn POLICY_ARN]
+```
+
+### Required Parameters
+
+- `--project` (`-p`): Project identifier
+- `--trusted-principal` (`-t`): ARN of principals trusted to assume the toolchain role (can be used multiple times)
+
+### Optional Parameters
+
+- `--permissions-boundary` (`-b`): ARN of a managed policy to set as the permissions boundary on the toolchain role
+- `--as-target`: Also bootstrap the account as a target account
+- `--synth`: Synthesize a CloudFormation template only (do not deploy)
+- `--profile`: AWS profile to use
+- `--region`: AWS region to use
+- `--qualifier`: A qualifier to append to the toolchain role (alpha-numeric, max 6 characters)
+- `--role-prefix`: An IAM path prefix to use with the Seed-Farmer roles
+- `--policy-prefix`: An IAM path prefix to use with the Seed-Farmer policies
+- `--policy-arn` (`-pa`): ARN of existing policy to attach to the target role (can be used multiple times)
+
+### Example
+
+```bash
+seedfarmer bootstrap toolchain \
+  --project myproject \
+  --trusted-principal arn:aws:iam::123456789012:role/Admin \
+  --as-target
+```
+
+This command:
+
+1. Sets up the toolchain account with the necessary IAM roles
+2. Also bootstraps the account as a target account (`--as-target`)
+3. Uses the project name `myproject`
+4. Trusts the `Admin` role to assume the toolchain role
+
+## Bootstrap Target Account
+
+The `seedfarmer bootstrap target` command sets up a target account with the necessary IAM roles and permissions.
+
+```bash
+seedfarmer bootstrap target \
+  --project PROJECT_NAME \
+  --toolchain-account ACCOUNT_ID \
+  [--permissions-boundary BOUNDARY_ARN] \
+  [--synth] \
+  [--profile PROFILE] \
+  [--region REGION] \
+  [--qualifier QUALIFIER] \
+  [--role-prefix ROLE_PREFIX] \
+  [--policy-arn POLICY_ARN]
+```
+
+### Required Parameters
+
+- `--project` (`-p`): Project identifier
+- `--toolchain-account` (`-t`): Account ID of the toolchain account trusted to assume the target account's deployment role
+
+### Optional Parameters
+
+- `--permissions-boundary` (`-b`): ARN of a managed policy to set as the permissions boundary on the target role
+- `--synth`: Synthesize a CloudFormation template only (do not deploy)
+- `--profile`: AWS profile to use
+- `--region`: AWS region to use
+- `--qualifier`: A qualifier to append to the target role (alpha-numeric, max 6 characters)
+- `--role-prefix`: An IAM path prefix to use with the Seed-Farmer roles
+- `--policy-arn` (`-pa`): ARN of existing policy to attach to the target role (can be used multiple times)
+
+### Example
+
+```bash
+seedfarmer bootstrap target \
+  --project myproject \
+  --toolchain-account 123456789012
+```
+
+This command:
+
+1. Sets up the target account with the necessary IAM roles
+2. Uses the project name `myproject`
+3. Trusts the toolchain account `123456789012` to assume the target account's deployment role
+
+## Qualifiers for Roles
+
+You can use qualifiers to segregate target deployments when using a multi-account structure. A qualifier appends a 6-character alpha-numeric string to the deployment role and toolchain role.
+
+!!! important
+    The qualifier **must be the same** on the toolchain role and each target role.
+
+## IAM Path Prefixes
+
+You can use IAM path prefixes for the toolchain role, target account deployment roles, and policies. This allows you to create logical separation to simplify permissions management.
+
+IAM paths must begin and end with a `/`. For example:
+
+```bash
+seedfarmer bootstrap toolchain \
+  --project myproject \
+  --trusted-principal arn:aws:iam::123456789012:role/Admin \
+  --role-prefix /myproject/ \
+  --policy-prefix /myproject/
+```
+
+## Deployment Role Security Controls
+
+The deployment role includes explicit deny policies for certain high-risk IAM actions to improve security posture. These include:
+
+- `iam:CreateAccessKey`
+- `iam:CreateLoginProfile`
+- `iam:UpdateLoginProfile`
+- `iam:AddUserToGroup`
+- `iam:AttachGroupPolicy`
+- `iam:AttachUserPolicy`
+- `iam:CreatePolicyVersion`
+- And several others
+
+These restrictions help maintain security by preventing potential privilege escalation paths while still allowing the deployment role to perform its intended functions.
+
+## Prepping the Account/Region
+
+Seed-Farmer leverages AWS CDK v2, which must be bootstrapped in each account/region combination to be used for each target account:
+
+```bash
+cdk bootstrap aws://ACCOUNT-NUMBER/REGION
+```
+
+Replace `ACCOUNT-NUMBER` with your AWS account number and `REGION` with your AWS region.
+
+## Minimum Permissions Required for Bootstrap
+
+The following policy outlines the minimum required IAM permissions to execute `seedfarmer bootstrap` commands:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:CreateChangeSet",
+                "cloudformation:DescribeChangeSet",
+                "cloudformation:ExecuteChangeSet",
+                "cloudformation:DescribeStacks"
+            ],
+            "Resource": [
+                "arn:aws:iam:::role/seedfarmer-*-toolchain-role",
+                "arn:aws:cloudformation:*:*:stack/seedfarmer-exampleproj-toolchain-role/*",
+                "arn:aws:cloudformation:*:*:stack/seedfarmer-exampleproj-deployment-role/*"
+            ]
+        },
+        {
+            "Sid": "VisualEditor1",
+            "Effect": "Allow",
+            "Action": [
+                "iam:GetRole",
+                "iam:DeleteRolePolicy",
+                "iam:TagRole",
+                "iam:CreateRole",
+                "iam:DeleteRole",
+                "iam:PutRolePolicy"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
+
+!!! note
+    Replace `exampleproj` with your project name.
+
+## Next Steps
+
+After bootstrapping your accounts, you can:
+
+- Follow the [Quick Start](quick-start.md) guide to deploy your first project
+- Learn about [manifests](../reference/manifests.md) to define your deployments
+- Explore [module development](../reference/module-development.md) to create your own modules
