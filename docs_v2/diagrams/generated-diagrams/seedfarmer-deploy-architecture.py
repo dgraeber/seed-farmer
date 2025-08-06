@@ -86,6 +86,7 @@ def create_diagram(title, filename, output_format="png"):
         
         s3_b >> Edge(label="Uses", color="black", style="dashed") >> kms_b
 
-# Generate both formats
+# Generate multiple formats
 create_diagram("SeedFarmer Cross Account Deployments", "seedfarmer_cross_account_deployments", "png")
+create_diagram("SeedFarmer Cross Account Deployments", "seedfarmer_cross_account_deployments", "svg")
 create_diagram("SeedFarmer Cross Account Deployments", "seedfarmer_cross_account_deployments", "dot")
