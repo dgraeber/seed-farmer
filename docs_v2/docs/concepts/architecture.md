@@ -8,6 +8,16 @@ This page explains the overall architecture of Seed-Farmer, including how it int
 
 Seed-Farmer does not create its own deployments directly. Instead, it acts as a broker between your module code and the AWS Cloud via AWS CodeSeeder. This architecture allows for secure, repeatable deployments across multiple AWS accounts and regions.
 
+## Security Model
+
+Seed-Farmer uses a least-privilege security model with the following components:
+
+- **Toolchain Role**: Created in the toolchain account and trusted by specified principals
+- **Deployment Role**: Created in each target account and trusted by the toolchain role
+- **Module-Specific Roles**: Created for each module with only the permissions needed for that module
+
+This security model ensures that each component has only the permissions it needs to perform its specific tasks.
+
 ## Multi-Account Architecture
 
 Seed-Farmer leverages IAM roles and assumes the proper role for deployment of modules. The architecture involves two main account types:
@@ -15,7 +25,7 @@ Seed-Farmer leverages IAM roles and assumes the proper role for deployment of mo
 - **Toolchain Account**: The primary account that stores deployment metadata and coordinates deployments
 - **Target Account(s)**: The account(s) where modules are actually deployed
 
-![Multi-Account Architecture](../_static/multi-account.png)
+![Multi-Account Architecture](../static/seedfarmer-architecture.png)
 
 The deployment process follows these steps:
 
@@ -24,25 +34,15 @@ The deployment process follows these steps:
 3. Seed-Farmer's toolchain role assumes the deployment role in all target accounts to fetch module metadata
 4. Seed-Farmer, via the deployment role in the target account, initiates module deployment
 5. Seed-Farmer, via the deployment role, interacts with S3 for bundle references
-6. Seed-Farmer, via the deployment role, assumes the module deployment role to complete module deployment
+6. Seed-Farmer, via the deployment role, attaches the module role to the AWS Codebuild job specification
+7. Seed-Farmer, via the deployment role, starts the AWS Codebuild job to deploy
+8. The module role interacts with the AWS Services as defined by the module being deployed 
 
-## Method of Processing
 
-Once Seed-Farmer resolves the proper target/deployment role, it follows these steps to deploy a single module in a single account/region:
+## DEREK FIX ME
 
-![Seed-Farmer Invocation](../_static/SeedFarmer.png)
 
-1. Invoke the Seed-Farmer CLI
-2. Seed-Farmer reads/writes deployment metadata with AWS Systems Manager
-3. Seed-Farmer invokes AWS IAM to create module-specific roles, attaching the proper least-privilege policies
-4. Seed-Farmer leverages AWS CodeSeeder for remote deployment on AWS CodeBuild
-5. AWS CodeSeeder prepares AWS CodeBuild
-6. AWS CodeBuild via AWS CodeSeeder inspects and fetches data from AWS Secrets Manager (if necessary)
-7. AWS CodeBuild via AWS CodeSeeder executes the custom deployspec for the module
-8. AWS CodeBuild via AWS CodeSeeder updates AWS Systems Manager with completed module metadata
-9. Seed-Farmer updates deployment metadata in AWS Systems Manager
-
-## AWS CodeSeeder Integration
+## Seed-Farmer Seedkit
 
 AWS CodeSeeder is an open-source tool that Seed-Farmer uses to securely deploy modules in AWS CodeBuild. Seed-Farmer checks if a seedkit is deployed in every account/region mapping defined in the deployment manifest and deploys it if not found.
 
@@ -58,15 +58,7 @@ To update the seedkit, you can either:
 !!! warning
     Deleting the seedkit stack deletes the AWS CodeBuild project and the entire history. Existing Seed-Farmer deployments (the modules deployed) will be unaffected and continue to run as before, but you will lose the build job history.
 
-## Security Model
 
-Seed-Farmer uses a least-privilege security model with the following components:
-
-- **Toolchain Role**: Created in the toolchain account and trusted by specified principals
-- **Deployment Role**: Created in each target account and trusted by the toolchain role
-- **Module-Specific Roles**: Created for each module with only the permissions needed for that module
-
-This security model ensures that each component has only the permissions it needs to perform its specific tasks.
 
 ## State Management
 
