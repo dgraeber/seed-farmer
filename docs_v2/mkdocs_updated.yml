@@ -111,9 +111,6 @@ nav:
       - Overview: modules/database/index.md
       - Neptune: modules/database/neptune.md
       - RDS: modules/database/rds.md
-    - Development:
-      - Overview: modules/dummy/index.md
-      - Blank Template: modules/dummy/blank.md
     - Integration:
       - Overview: modules/integration/index.md
       - FSx Lustre on EKS: modules/integration/fsx-lustre-on-eks.md
