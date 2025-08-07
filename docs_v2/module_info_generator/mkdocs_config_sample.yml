@@ -1,0 +1,30 @@
+# Add this to your mkdocs.yml file
+
+# Required for expandable sections
+markdown_extensions:
+  - pymdownx.details
+  - pymdownx.superfences
+  - admonition
+  - attr_list
+
+# Theme configuration (Material theme recommended)
+theme:
+  name: material
+  features:
+    - navigation.expand
+    - navigation.sections
+    - content.code.copy
+
+# Sample navigation structure (will be auto-generated)
+nav:
+  - Home: index.md
+  - Modules:
+    - Overview: modules/index.md
+    - Compute:
+      - Overview: modules/compute/index.md
+      - AWS Batch: modules/compute/aws-batch.md
+      - EKS: modules/compute/eks.md
+    - Storage:
+      - Overview: modules/storage/index.md
+      - FSx Lustre: modules/storage/fsx-lustre.md
+      - EFS: modules/storage/efs.md
