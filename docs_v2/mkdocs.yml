@@ -100,6 +100,8 @@ nav:
     - Manifests: reference/manifests.md
     - Module Development: reference/module-development.md
     - FAQ: reference/faq.md
+  - Public Modules:
+    - modules/index.md
 
 extra:
   social:

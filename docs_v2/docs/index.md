@@ -18,12 +18,15 @@ Key features include:
 
 ## Core Concepts
 
-Seed-Farmer organizes deployments using the following hierarchy:
+Seed-Farmer organizes deployments within scoped hierarchies to insulate artifacts from one another, following the principals of least-privilege and dedicated access roles.  Within a scoped unit, all artifacts are named according to this structured to prevent resource collisions. 
 
-- **Project**: Maps to an AWS CodeSeeder managed CodeBuild project
+- **Project**: Represents all deployments scoped to a single logical name
 - **Deployment**: Represents all modules leveraging AWS resources in one or many accounts
 - **Group**: Contains modules that can be deployed concurrently (no inter-dependencies)
 - **Module**: The actual deployable unit of code
+
+Seed-Farmer supports multi-account / multi-region deployments scoped to individual modules within a project.
+
 
 ## Getting Started
 

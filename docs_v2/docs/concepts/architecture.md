@@ -46,14 +46,14 @@ The deployment process follows these steps:
 
 AWS CodeSeeder is an open-source tool that Seed-Farmer uses to securely deploy modules in AWS CodeBuild. Seed-Farmer checks if a seedkit is deployed in every account/region mapping defined in the deployment manifest and deploys it if not found.
 
-### Updating the AWS CodeSeeder Seedkit
+### Updating the Seed-Farmer Seedkit
 
 The seedkit has a known naming convention of `aws-codeseeder-<project name>` as a CloudFormation stack name. For example, the name of the seedkit stack for a project named `addf` would be `aws-codeseeder-addf`.
 
 To update the seedkit, you can either:
 
 - Delete the CloudFormation template in that account/region mapping and let Seed-Farmer redeploy it during the next deployment
-- Use the AWS CodeSeeder CLI commands to deploy it manually
+- Use the Seed-Farmer CLI commands to deploy it manually (this must occur in each deployment account)
 
 !!! warning
     Deleting the seedkit stack deletes the AWS CodeBuild project and the entire history. Existing Seed-Farmer deployments (the modules deployed) will be unaffected and continue to run as before, but you will lose the build job history.

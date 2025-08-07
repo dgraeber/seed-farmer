@@ -16,12 +16,12 @@
 }
 
 .md-nav__link {
-  color: #6db7dc !important;
+  color: #34a2d9 !important;
   fill: #000 !important;
 }
 
 .md_ellipsis {
-  color: #6db7dc !important;
+  color: #34a2d9 !important;
   fill: #000 !important;
 }
 
@@ -32,5 +32,5 @@
 
 .md-typeset .headerlink:hover,
 .md-typeset .headerlink:focus {
-  color: #cc404a !important;
+  color: #d8a932 !important;
 }

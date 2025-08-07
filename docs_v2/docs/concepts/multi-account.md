@@ -9,7 +9,7 @@ Seed-Farmer uses two types of accounts:
 - **Toolchain Account**: The primary account that stores deployment metadata and coordinates deployments
 - **Target Account(s)**: The account(s) where modules are actually deployed
 
-There can be only ONE toolchain account with MANY target accounts. A toolchain account can also be a target account. Each account only needs to be bootstrapped once, regardless of the region that modules are deployed in. The roles created are global to the account.
+There can be only ONE toolchain account with many target accounts. A toolchain account can also be a target account. Each account only needs to be bootstrapped once, regardless of the region that modules are deployed in. The roles created are global to the account.
 
 ## IAM Roles
 

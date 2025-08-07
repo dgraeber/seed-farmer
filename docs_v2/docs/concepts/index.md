@@ -28,6 +28,9 @@ A group represents all modules that can be deployed concurrently. No module in a
 
 A module is what gets deployed. It is represented by code. A module can be deployed multiple times in the same deployment as long as it has a unique logical name.
 
+
+![Project Definition](../static/project-definition.png)
+
 ## Dependency Management
 
 Seed-Farmer manages dependencies between modules, ensuring that modules are deployed in the correct order. Modules can reference outputs from other modules, allowing for complex deployment scenarios.
