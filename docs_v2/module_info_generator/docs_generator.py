@@ -15,7 +15,7 @@ from typing import Dict, List, Optional, Tuple
 import tempfile
 import shutil
 
-class IDFDocsGenerator:
+class DocsGenerator:
     def __init__(self, repo_url: str = "https://github.com/awslabs/idf-modules.git", 
                  output_dir: str = "docs/modules"):
         self.repo_url = repo_url

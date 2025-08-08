@@ -9,24 +9,17 @@ This documentation is automatically generated from the [AWS IDF Modules](https:/
 
 ### [Database](./database/index.md)
 
-
 ### [Dummy](./dummy/index.md)
-
 
 ### [Integration](./integration/index.md)
 
-
 ### [Network](./network/index.md)
-
 
 ### [Orchestration](./orchestration/index.md)
 
-
 ### [Replication](./replication/index.md)
 
-
 ### [Service-Catalog](./service-catalog/index.md)
-
 
 ### [Storage](./storage/index.md)
 
