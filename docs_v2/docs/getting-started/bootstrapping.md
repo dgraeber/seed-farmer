@@ -7,7 +7,7 @@ Before you can use Seed-Farmer to deploy resources, you need to bootstrap your A
 Seed-Farmer uses two types of accounts:
 
 - **Toolchain Account**: The primary account that stores deployment metadata and coordinates deployments
-- **Target Account(s)**: The account(s) where modules are actually deployed
+- **Target Account(s)**: The account(s) where modules are actually deployed ( *target account and deployment account are referred to  synonymously in this document* )
 
 You must have only one toolchain account bootstrapped and at least one target account bootstrapped. The account that is the toolchain account can also be bootstrapped as a target account.
 

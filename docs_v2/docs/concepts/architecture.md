@@ -25,7 +25,7 @@ Seed-Farmer leverages IAM roles and assumes the proper role for deployment of mo
 - **Toolchain Account**: The primary account that stores deployment metadata and coordinates deployments
 - **Target Account(s)**: The account(s) where modules are actually deployed
 
-![Multi-Account Architecture](../static/seedfarmer-architecture.png)
+![Multi-Account Architecture](../static/seedfarmer-architecture_transparent.png)
 
 The deployment process follows these steps:
 

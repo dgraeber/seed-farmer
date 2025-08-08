@@ -1,5 +1,7 @@
 # Local Deployments
 
+# This need to be rewritten...Local Deployment vs Remote Deployments
+
 This guide explains how to deploy Seed-Farmer projects locally for development and testing purposes.
 
 ## Overview

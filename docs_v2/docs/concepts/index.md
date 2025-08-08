@@ -14,7 +14,7 @@ Seed-Farmer is designed to work across multiple AWS accounts. The [Multi-Account
 
 ### Project
 
-A project in Seed-Farmer has a direct one-to-one relationship with an AWS CodeSeeder managed CodeBuild project. You can have multiple projects in an account, and they are isolated from one another (no one project can use artifacts from another project).
+A project in Seed-Farmer has a direct one-to-one relationship with an AWS CodeBuild project. You can have multiple projects in an account, and they are isolated from one another (no project can use artifacts from another project).
 
 ### Deployment
 
@@ -29,7 +29,7 @@ A group represents all modules that can be deployed concurrently. No module in a
 A module is what gets deployed. It is represented by code. A module can be deployed multiple times in the same deployment as long as it has a unique logical name.
 
 
-![Project Definition](../static/project-definition.png)
+![Project Definition](../static/project-definition_transparent.png)
 
 ## Dependency Management
 

@@ -31,7 +31,7 @@ You can pin to a particular version by referring to the version in the install (
 
 ### Using pip
 
-The recommended way to install Seed-Farmer is using pip:
+Install Seed-Farmer is using pip:
 
 ```bash
 uv pip install seed-farmer
@@ -77,7 +77,7 @@ export AWS_REGION=your-region
 
 ### AWS CDK
 
-If you're using CDK-based modules, you'll need to install the AWS CDK:
+If you're using CDK-based modules, you'll need to install the AWS CDK in each target account:
 
 ```bash
 npm install -g aws-cdk

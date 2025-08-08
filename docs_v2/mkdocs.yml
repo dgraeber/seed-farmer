@@ -92,6 +92,7 @@ nav:
   - Guides:
     - guides/index.md
     - Local Deployments: guides/local-deployments.md
+    - Remote Deployments: guides/remote-deployments.md
     - Project Development: guides/project-development.md
   - Reference:
     - reference/index.md
@@ -101,46 +102,9 @@ nav:
     - FAQ: reference/faq.md
   - Public Modules:
     - Overview: modules/index.md
-    - Compute:
-      - Overview: modules/compute/index.md
-      - AWS Batch: modules/compute/aws-batch.md
-      - EKS: modules/compute/eks.md
-      - EMR on EKS: modules/compute/emr-on-eks.md
-      - EMR Serverless: modules/compute/emr-serverless.md
-    - Database:
-      - Overview: modules/database/index.md
-      - Neptune: modules/database/neptune.md
-      - RDS: modules/database/rds.md
-    - Development:
-      - Overview: modules/dummy/index.md
-      - Blank Template: modules/dummy/blank.md
-    - Integration:
-      - Overview: modules/integration/index.md
-      - FSx Lustre on EKS: modules/integration/fsx-lustre-on-eks.md
-    - Network:
-      - Overview: modules/network/index.md
-      - Basic CDK: modules/network/basic-cdk.md
-    - Orchestration:
-      - Overview: modules/orchestration/index.md
-      - MWAA: modules/orchestration/mwaa.md
-    - Replication:
-      - Overview: modules/replication/index.md
-      - Docker Image Replication: modules/replication/dockerimage-replication.md
-    - Service Catalog:
-      - Overview: modules/service-catalog/index.md
-      - App Registry: modules/service-catalog/app-registry.md
-    - Storage:
-      - Overview: modules/storage/index.md
-      - S3 Buckets: modules/storage/buckets.md
-      - ECR: modules/storage/ecr.md
-      - EFS: modules/storage/efs.md
-      - FSx Lustre: modules/storage/fsx-lustre.md
-      - OpenSearch: modules/storage/opensearch.md
-      - OpenSearch Serverless: modules/storage/opensearch-serverless.md
-    - Testing:
-      - Overview: modules/testing/index.md
-      - Integration Tests: modules/testing/integration-tests.md
-
+    - IDF Modules: modules/idf-modules/index.md
+    - AIOps Modules: modules/aiops-modules/index.md
+    
 extra:
   social:
     - icon: fontawesome/brands/github

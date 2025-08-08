@@ -1,64 +1,11 @@
-# IDF Modules Documentation
+# Public Modules
 
-This documentation is automatically generated from the [AWS IDF Modules](https://github.com/awslabs/idf-modules) repository.
+Modules are available for use in your deployments.  The can be referenced directly in manifests via a gitpath.   Seed-Farmer will manage fetching the code.  
 
-## Module Categories
-
-
-### [Compute](./compute/index.md)
-
-4 modules available
+You can also clone the repository and reference the modules from a local filesystem. 
 
 
-### [Database](./database/index.md)
+## Currently Available Public Modules 
 
-2 modules available
-
-
-### [Dummy](./dummy/index.md)
-
-1 module available
-
-
-### [Integration](./integration/index.md)
-
-1 module available
-
-
-### [Network](./network/index.md)
-
-1 module available
-
-
-### [Orchestration](./orchestration/index.md)
-
-1 module available
-
-
-### [Replication](./replication/index.md)
-
-1 module available
-
-
-### [Service-Catalog](./service-catalog/index.md)
-
-1 module available
-
-
-### [Storage](./storage/index.md)
-
-6 modules available
-
-
-### [Testing](./testing/index.md)
-
-1 module available
-
-
-## About IDF Modules
-
-The Industrial Data Fabric (IDF) modules are reusable infrastructure components designed to help you build data processing and analytics solutions on AWS.
-
----
-
-*Last updated: Auto-generated from repository*
+- [IDF Modules](idf-modules/index.md) - the Industry Deployment Framework modules represent commonly used services that become the basis for deployments
+- [AI Ops Modules](aiops-modules/index.md) - the Industry Deployment Framework modules represent commonly used services that become the basis for deployments

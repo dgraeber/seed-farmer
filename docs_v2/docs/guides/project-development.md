@@ -1,5 +1,7 @@
 # Project Development
 
+# This need to be rewritten...
+
 This guide provides best practices and tips for developing projects with Seed-Farmer. It covers organizing your code, managing dependencies, and structuring your manifests.
 
 ## Project Structure
@@ -41,6 +43,8 @@ This structure separates the deployment manifests from the module code, allowing
 
 ## Creating a New Project
 
+# REWRITE THIS
+
 To create a new project, follow these steps:
 
 1. Create the project directory structure
@@ -51,7 +55,7 @@ To create a new project, follow these steps:
 ### Creating the Project Directory Structure
 
 ```bash
-mkdir -p myproject/{manifests/{dev,prod}/modules,modules}
+seedfarmer init project --name
 cd myproject
 ```
 
@@ -92,8 +96,7 @@ targetAccountMappings:
 Create a module manifest for each group:
 
 ```bash
-touch manifests/dev/modules/core.yaml
-touch manifests/dev/modules/services.yaml
+seedfarmer init module name
 ```
 
 Edit the module manifests to define the modules in each group. For example:

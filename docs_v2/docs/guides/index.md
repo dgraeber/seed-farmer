@@ -4,7 +4,12 @@ This section provides how-to guides for common tasks with Seed-Farmer. These gui
 
 ## Local Deployments
 
-The [Local Deployments](local-deployments.md) guide explains how to deploy Seed-Farmer projects locally for development and testing purposes. This is useful for testing changes before deploying to production environments.
+The [Local Deployments](local-deployments.md) guide explains how to deploy Seed-Farmer projects locally for development and testing purposes. It uses an AWS Codebuild Local image with Docker to deploy artifacts.  This is useful for testing changes before deploying to production environments.
+
+
+## Remote Deployments
+
+The [Remote Deployments](remote-deployments.md) guide explains how to deploy Seed-Farmer projects locally for development and testing purposes. It uses an AWS Codebuild Local image with Docker to deploy artifacts.  This is useful for testing changes before deploying to production environments.
 
 ## Project Development
 

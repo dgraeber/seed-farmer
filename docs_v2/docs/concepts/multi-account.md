@@ -21,7 +21,7 @@ Seed-Farmer uses IAM roles to manage access between accounts:
 
 The toolchain role assumes the deployment role in the target account, which then assumes the module-specific role to deploy the module.
 
-![Multi-Account Architecture](../static/role-assumption.png)
+![Multi-Account Architecture](../static/role-assumption_transparent.png)
 
 ## Role Assumption Flow
 
