@@ -5,7 +5,7 @@ echo "📚 Updating MkDocs site content..."
 
 # Build the latest docs
 echo "🔨 Building MkDocs site..."
-cd /home/dgraeber/workplace/seed-group/seed-farmer/docs_v2
+cd /Users/dgraeber/aws-seed-group/seed-farmer-v2docs/seed-farmer/docs_v2
 uv run mkdocs build --clean
 cd - > /dev/null
 
@@ -30,14 +30,14 @@ BUCKET_NAME=$(aws cloudformation describe-stacks \
 echo "📤 Uploading to S3 bucket: $BUCKET_NAME"
 
 # Sync the site to S3
-aws s3 sync /home/dgraeber/workplace/seed-group/seed-farmer/docs_v2/site/ s3://$BUCKET_NAME/ \
+aws s3 sync /Users/dgraeber/aws-seed-group/seed-farmer-v2docs/seed-farmer/docs_v2/site/ s3://$BUCKET_NAME/ \
     --delete \
     --cache-control "public, max-age=31536000" \
     --exclude "*.html" \
     --exclude "*.xml"
 
 # Upload HTML files with shorter cache
-aws s3 sync /home/dgraeber/workplace/seed-group/seed-farmer/docs_v2/site/ s3://$BUCKET_NAME/ \
+aws s3 sync /Users/dgraeber/aws-seed-group/seed-farmer-v2docs/seed-farmer/docs_v2/site/ s3://$BUCKET_NAME/ \
     --delete \
     --cache-control "public, max-age=3600" \
     --include "*.html" \

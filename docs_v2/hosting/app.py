@@ -29,22 +29,13 @@ class MkDocsHostingStack(Stack):
         
         # S3 bucket for hosting static content
         bucket = s3.Bucket(
-            self, "DocsBucket",
+            self, "dgraeberaws-seedfarmer-docsv2",
             bucket_name=f"{site_name}-{self.account}-{self.region}",
             public_read_access=False,
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             removal_policy=RemovalPolicy.DESTROY,
             auto_delete_objects=True,
             versioned=True
-        )
-        
-        # Origin Access Control for CloudFront
-        oac = cloudfront.OriginAccessControl(
-            self, "OAC",
-            description=f"OAC for {site_name}",
-            origin_access_control_origin_type=cloudfront.OriginAccessControlOriginType.S3,
-            signing_behavior=cloudfront.OriginAccessControlSigningBehavior.ALWAYS,
-            signing_protocol=cloudfront.OriginAccessControlSigningProtocol.SIGV4
         )
         
         # Lambda@Edge function for Basic Auth
@@ -62,10 +53,7 @@ class MkDocsHostingStack(Stack):
         distribution = cloudfront.Distribution(
             self, "Distribution",
             default_behavior=cloudfront.BehaviorOptions(
-                origin=origins.S3Origin(
-                    bucket,
-                    origin_access_control=oac
-                ),
+                origin=origins.S3BucketOrigin.with_origin_access_control(bucket),
                 viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                 cache_policy=cloudfront.CachePolicy.CACHING_OPTIMIZED,
                 edge_lambdas=[
@@ -104,7 +92,7 @@ class MkDocsHostingStack(Stack):
         )
         
         # Deploy MkDocs site to S3 (if site directory exists)
-        site_path = "/home/dgraeber/workplace/seed-group/seed-farmer/docs_v2/site"
+        site_path = "/Users/dgraeber/aws-seed-group/seed-farmer-v2docs/seed-farmer/docs_v2/site"
         if os.path.exists(site_path):
             s3deploy.BucketDeployment(
                 self, "DeployDocs",
@@ -144,9 +132,9 @@ class MkDocsHostingStack(Stack):
         return """
 const users = {
     // Add your team members here: 'username': 'password'
-    'admin': 'your-secure-password-here',
-    'team-member-1': 'another-secure-password',
-    'team-member-2': 'yet-another-password'
+    'admin': 'dgrabs',
+    'viewer1': 'Thepassword1!',
+    'viewer2': 'Thepassword2!'
 };
 
 exports.handler = async (event) => {
@@ -161,7 +149,7 @@ exports.handler = async (event) => {
             headers: {
                 'www-authenticate': [{
                     key: 'WWW-Authenticate',
-                    value: 'Basic realm="Seed Farmer Documentation"'
+                    value: 'Basic realm="Seed Farmer Documentation - V2"'
                 }],
                 'content-type': [{
                     key: 'Content-Type',

@@ -10,17 +10,18 @@ if [ ! -f "app.py" ]; then
 fi
 
 # Check if MkDocs site is built
-DOCS_SITE_PATH="/home/dgraeber/workplace/seed-group/seed-farmer/docs_v2/site"
+DOCS_SITE_PATH="/Users/dgraeber/aws-seed-group/seed-farmer-v2docs/seed-farmer/docs_v2/site"
 if [ ! -d "$DOCS_SITE_PATH" ]; then
     echo "📚 Building MkDocs site first..."
-    cd /home/dgraeber/workplace/seed-group/seed-farmer/docs_v2
+    cd /Users/dgraeber/aws-seed-group/seed-farmer-v2docs/seed-farmer/docs_v2
     uv run mkdocs build --clean
     cd - > /dev/null
 fi
 
+source /Users/dgraeber/aws-seed-group/seed-farmer-v2docs/seed-farmer/docs_v2/.venv/bin/activate
 # Install CDK dependencies
 echo "📦 Installing CDK dependencies..."
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 
 # Bootstrap CDK (if needed)
 echo "🔧 Checking CDK bootstrap..."
@@ -37,14 +38,14 @@ REGION=${AWS_DEFAULT_REGION:-us-east-1}
 echo "📍 Deploying to account: $ACCOUNT, region: $REGION"
 
 # Bootstrap if needed
-if ! aws cloudformation describe-stacks --stack-name CDKToolkit --region $REGION > /dev/null 2>&1; then
-    echo "🔧 Bootstrapping CDK..."
-    cdk bootstrap aws://$ACCOUNT/$REGION
-fi
+# if ! aws cloudformation describe-stacks --stack-name CDKToolkit --region $REGION > /dev/null 2>&1; then
+#     echo "🔧 Bootstrapping CDK..."
+#     cdk bootstrap aws://$ACCOUNT/$REGION
+# fi
 
 # Deploy the stack
 echo "🚀 Deploying stack..."
-cdk deploy --require-approval never
+cdk deploy --require-approval never --progress events --app "python app.py"
 
 echo ""
 echo "✅ Deployment complete!"
