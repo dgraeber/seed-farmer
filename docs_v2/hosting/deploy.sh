@@ -10,7 +10,7 @@ if [ ! -f "app.py" ]; then
 fi
 
 # Check if MkDocs site is built
-SRC_PATH="/Users/dgraeber/aws-seed-group/seed-farmer-v2docs/seed-farmer/docs_v2"
+SRC_PATH="/home/dgraeber/workplace/seed-group/seed-farmer/docs_v2"
 DOCS_SITE_PATH="$SRC_PATH/site"
 if [ ! -d "$DOCS_SITE_PATH" ]; then
     echo "📚 Building MkDocs site first..."
@@ -19,7 +19,7 @@ if [ ! -d "$DOCS_SITE_PATH" ]; then
     cd - > /dev/null
 fi
 
-source $$SRC_PATH/.venv/bin/activate
+source $SRC_PATH/.venv/bin/activate
 # Install CDK dependencies
 echo "📦 Installing CDK dependencies..."
 uv pip install -r requirements.txt

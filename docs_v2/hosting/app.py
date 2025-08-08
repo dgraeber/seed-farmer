@@ -49,6 +49,17 @@ class MkDocsHostingStack(Stack):
             description="Basic Auth for MkDocs site"
         )
         
+        # Lambda@Edge function for URL rewriting (to handle MkDocs routing)
+        url_rewrite_function = lambda_.Function(
+            self, "UrlRewriteFunction",
+            runtime=lambda_.Runtime.NODEJS_18_X,
+            handler="index.handler",
+            code=lambda_.Code.from_inline(self._get_url_rewrite_function_code()),
+            timeout=Duration.seconds(5),
+            memory_size=128,
+            description="URL rewriting for MkDocs routing"
+        )
+
         # CloudFront distribution
         distribution = cloudfront.Distribution(
             self, "Distribution",
@@ -60,11 +71,23 @@ class MkDocsHostingStack(Stack):
                     cloudfront.EdgeLambda(
                         function_version=auth_function.current_version,
                         event_type=cloudfront.LambdaEdgeEventType.VIEWER_REQUEST
+                    ),
+                    cloudfront.EdgeLambda(
+                        function_version=url_rewrite_function.current_version,
+                        event_type=cloudfront.LambdaEdgeEventType.ORIGIN_REQUEST
                     )
                 ]
             ),
             default_root_object="index.html",
             error_responses=[
+                # Handle 403 errors (S3 returns 403 for missing files)
+                cloudfront.ErrorResponse(
+                    http_status=403,
+                    response_http_status=404,
+                    response_page_path="/404.html",
+                    ttl=Duration.minutes(5)
+                ),
+                # Handle 404 errors
                 cloudfront.ErrorResponse(
                     http_status=404,
                     response_http_status=404,
@@ -92,7 +115,7 @@ class MkDocsHostingStack(Stack):
         )
         
         # Deploy MkDocs site to S3 (if site directory exists)
-        site_path = "/Users/dgraeber/aws-seed-group/seed-farmer-v2docs/seed-farmer/docs_v2/site"
+        site_path = "/home/dgraeber/workplace/seed-group/seed-farmer/docs_v2/site"
         if os.path.exists(site_path):
             s3deploy.BucketDeployment(
                 self, "DeployDocs",
@@ -127,6 +150,27 @@ class MkDocsHostingStack(Stack):
             description="Complete site URL"
         )
     
+    def _get_url_rewrite_function_code(self) -> str:
+        """Returns the Lambda@Edge function code for URL rewriting"""
+        return """
+exports.handler = async (event) => {
+    const request = event.Records[0].cf.request;
+    const uri = request.uri;
+    
+    // If the URI ends with a slash, append index.html
+    if (uri.endsWith('/')) {
+        request.uri = uri + 'index.html';
+    }
+    // If the URI doesn't have an extension and doesn't end with a slash, 
+    // assume it's a directory and append /index.html
+    else if (!uri.includes('.') && !uri.endsWith('/')) {
+        request.uri = uri + '/index.html';
+    }
+    
+    return request;
+};
+"""
+
     def _get_auth_function_code(self) -> str:
         """Returns the Lambda@Edge function code for Basic Auth"""
         return """
