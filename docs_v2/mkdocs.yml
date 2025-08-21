@@ -35,6 +35,8 @@ theme:
     - navigation.expand
     - navigation.indexes
     - navigation.top
+    - toc.follow
+    - toc.integrate
     - search.highlight
     - search.share
     - search.suggest
@@ -72,6 +74,7 @@ markdown_extensions:
   - tables
   - toc:
       permalink: true
+      toc_depth: 3
 
 plugins:
   - search

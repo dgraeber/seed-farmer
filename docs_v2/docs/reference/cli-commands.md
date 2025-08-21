@@ -98,7 +98,8 @@ seedfarmer apply MANIFEST_PATH \
   [--qualifier QUALIFIER] \
   [--role-prefix ROLE_PREFIX] \
   [--policy-prefix POLICY_PREFIX] \
-  [--policy-arn POLICY_ARN]
+  [--policy-arn POLICY_ARN] \
+  [--local]
 ```
 
 #### Required Parameters
@@ -116,6 +117,7 @@ seedfarmer apply MANIFEST_PATH \
 - `--role-prefix`: An IAM path prefix to use with the Seed-Farmer roles
 - `--policy-prefix`: An IAM path prefix to use with the Seed-Farmer policies
 - `--policy-arn` (`-pa`): ARN of existing policy to attach to the target role (can be used multiple times)
+- `--local`: Execute deployment locally using Docker instead of AWS CodeBuild (development only, single account/region)
 
 ### destroy
 
@@ -131,7 +133,8 @@ seedfarmer destroy DEPLOYMENT_NAME \
   [--qualifier QUALIFIER] \
   [--role-prefix ROLE_PREFIX] \
   [--policy-prefix POLICY_PREFIX] \
-  [--policy-arn POLICY_ARN]
+  [--policy-arn POLICY_ARN] \
+  [--local]
 ```
 
 #### Required Parameters
@@ -149,6 +152,7 @@ seedfarmer destroy DEPLOYMENT_NAME \
 - `--role-prefix`: An IAM path prefix to use with the Seed-Farmer roles
 - `--policy-prefix`: An IAM path prefix to use with the Seed-Farmer policies
 - `--policy-arn` (`-pa`): ARN of existing policy to attach to the target role (can be used multiple times)
+- `--local`: Execute destruction locally using Docker instead of AWS CodeBuild (development only, single account/region)
 
 ### list deployments
 
@@ -200,6 +204,64 @@ seedfarmer list modules DEPLOYMENT_NAME \
 - `--qualifier`: A qualifier to append to the roles (alpha-numeric, max 6 characters)
 - `--role-prefix`: An IAM path prefix to use with the Seed-Farmer roles
 
+## Seedkit Commands
+
+### seedkit deploy
+
+Deploy a seedkit in the specified account and region.
+
+```bash
+seedfarmer seedkit deploy PROJECT_NAME \
+  [--policy-arn POLICY_ARN] \
+  [--deploy-codeartifact] \
+  [--profile PROFILE] \
+  [--region REGION] \
+  [--vpc-id VPC_ID] \
+  [--subnet-id SUBNET_ID] \
+  [--sg-id SG_ID] \
+  [--permissions-boundary-arn BOUNDARY_ARN] \
+  [--synth] \
+  [--debug]
+```
+
+#### Required Parameters
+
+- `PROJECT_NAME`: Project identifier
+
+#### Optional Parameters
+
+- `--policy-arn`: ARN of existing policy to attach to the seedkit role
+- `--deploy-codeartifact`: Deploy the optional CodeArtifact Domain and Repository (default: skip-codeartifact)
+- `--profile`: AWS profile to use
+- `--region`: AWS region to use
+- `--vpc-id`: The VPC ID that the CodeBuild Project resides in (only 1)
+- `--subnet-id`: A subnet that the CodeBuild Project resides in (can be used multiple times)
+- `--sg-id`: A Security Group in the VPC that the CodeBuild Project can leverage (up to 5, can be used multiple times)
+- `--permissions-boundary-arn` (`-b`): ARN of a Managed Policy to set as the Permission Boundary on the CodeBuild Role
+- `--synth`: Synthesize seedkit template only. Do not deploy (default: no-synth)
+- `--debug`: Enable detailed logging (default: no-debug)
+
+### seedkit destroy
+
+Destroy a seedkit in the specified account and region.
+
+```bash
+seedfarmer seedkit destroy PROJECT_NAME \
+  [--profile PROFILE] \
+  [--region REGION] \
+  [--debug]
+```
+
+#### Required Parameters
+
+- `PROJECT_NAME`: Project identifier
+
+#### Optional Parameters
+
+- `--profile`: AWS profile to use
+- `--region`: AWS region to use
+- `--debug`: Enable detailed logging (default: no-debug)
+
 ## Module Commands
 
 ### init module
@@ -224,7 +286,7 @@ seedfarmer init module \
 
 ### metadata add
 
-Add metadata to a module. This command can only be run from a deployspec.yaml.
+Add metadata to a module. **This command can only be run within the deployspec execution context** (CodeBuild or local Docker container during module deployment).
 
 ```bash
 seedfarmer metadata add \
@@ -240,7 +302,7 @@ seedfarmer metadata add \
 
 ### metadata convert
 
-Convert CDK output to Seed-Farmer metadata. This command can only be run from a deployspec.yaml.
+Convert CDK output to Seed-Farmer metadata. **This command can only be run within the deployspec execution context** (CodeBuild or local Docker container during module deployment).
 
 ```bash
 seedfarmer metadata convert \
@@ -255,7 +317,7 @@ seedfarmer metadata convert \
 
 ### metadata depmod
 
-Get the fully resolved deployment name of the module. This command can only be run from a deployspec.yaml.
+Get the fully resolved deployment name of the module. **This command can only be run within the deployspec execution context** (CodeBuild or local Docker container during module deployment).
 
 ```bash
 seedfarmer metadata depmod
@@ -263,7 +325,7 @@ seedfarmer metadata depmod
 
 ### metadata paramvalue
 
-Get the parameter value based on the suffix. This command can only be run from a deployspec.yaml.
+Get the parameter value based on the suffix. **This command can only be run within the deployspec execution context** (CodeBuild or local Docker container during module deployment).
 
 ```bash
 seedfarmer metadata paramvalue \
@@ -319,11 +381,51 @@ seedfarmer apply manifests/mydeployment/deployment.yaml \
   --env-file .env
 ```
 
+### Apply a Local Deployment
+
+```bash
+seedfarmer apply manifests/mydeployment/deployment.yaml \
+  --local \
+  --env-file .env
+```
+
 ### Destroy a Deployment
 
 ```bash
 seedfarmer destroy mydeployment \
   --env-file .env
+```
+
+### Destroy a Local Deployment
+
+```bash
+seedfarmer destroy mydeployment \
+  --local \
+  --env-file .env
+```
+
+### Deploy Seedkit Manually
+
+```bash
+seedfarmer seedkit deploy myproject \
+  --region us-east-1
+```
+
+### Deploy Seedkit with VPC Configuration
+
+```bash
+seedfarmer seedkit deploy myproject \
+  --region us-east-1 \
+  --vpc-id vpc-12345678 \
+  --subnet-id subnet-abcd1234 \
+  --sg-id sg-ijkl9012
+```
+
+### Destroy Seedkit
+
+```bash
+seedfarmer seedkit destroy myproject \
+  --region us-east-1
 ```
 
 ### List Deployments
