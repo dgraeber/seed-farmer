@@ -336,25 +336,6 @@ seedfarmer metadata paramvalue \
 
 - `--suffix` (`-s`): Suffix of the parameter name
 
-## Validation Commands
-
-### validate
-
-Validate a deployment manifest.
-
-```bash
-seedfarmer validate MANIFEST_PATH \
-  [--env-file ENV_FILE]
-```
-
-#### Required Parameters
-
-- `MANIFEST_PATH`: Path to the deployment manifest file
-
-#### Optional Parameters
-
-- `--env-file`: Path to a file containing environment variables
-
 ## Examples
 
 ### Bootstrap a Toolchain Account
