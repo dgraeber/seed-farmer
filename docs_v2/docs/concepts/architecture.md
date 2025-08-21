@@ -146,9 +146,11 @@ Seed-Farmer optimizes deployment performance through multiple levels of parallel
 
 ```mermaid
 graph TD
-    D[Deployment] --> G1["Group 1<br/>(Networking)"]
-    D --> G2["Group 2<br/>(Compute)"]
-    D --> G3["Group 3<br/>(Applications)"]
+    SF[Deployment] 
+    
+    SF -->|"1. Deploy First"| G1["Group 1<br/>(Networking)"]
+    SF -->|"2. Deploy Second"| G2["Group 2<br/>(Compute)"]
+    SF -->|"3. Deploy Third"| G3["Group 3<br/>(Applications)"]
     
     G1 --> M1[VPC Module]
     G1 --> M3[Load Balancer]
@@ -161,15 +163,15 @@ graph TD
 
 **Execution Flow:**
 
-- **Sequential Groups**: Groups deploy in dependency order (Group 1 → Group 2 → Group 3)
+- **Sequential Groups**: Seed-Farmer calls groups one after another in dependency order (Group 1, then Group 2, then Group 3)
 - **Parallel Modules**: Modules within each group deploy simultaneously
 - **Account Isolation**: Each target account processes its modules independently
 
 **Parallelism Levels:**
 
 - **Account-Level**: Multiple target accounts deploy simultaneously
-- **Group-Level**: Independent groups deploy in dependency order
-- **Module-Level**: Modules within groups deploy concurrently
+- **Group-Level**: Seed-Farmer calls groups sequentially in dependency order
+- **Module-Level**: Modules within each group deploy concurrently (in parallel)
 - **Configurable Concurrency**: Adjustable parallelism per group
 
 ### Dependency Management
