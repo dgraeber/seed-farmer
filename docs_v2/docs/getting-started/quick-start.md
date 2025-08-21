@@ -92,5 +92,5 @@ Now that you've deployed your first project with Seed-Farmer, you can:
 
 - Learn how to [bootstrap](bootstrapping.md) multiple accounts
 - Explore the [core concepts](../concepts/index.md) behind Seed-Farmer
-- Learn how to [create your own modules](../reference/module-development.md)
+- Learn how to [create your own modules](../guides//module-development.md)
 - Check out the [guides](../guides/index.md) for common tasks

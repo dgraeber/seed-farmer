@@ -12,7 +12,7 @@ The [Manifests](manifests.md) page explains the format and structure of Seed-Far
 
 ## Module Development
 
-The [Module Development](module-development.md) page provides detailed information on developing modules for Seed-Farmer, including required files, deployspec format, and best practices.
+The [Module Development](../guides/module-development.md) page provides detailed information on developing modules for Seed-Farmer, including required files, deployspec format, and best practices.
 
 ## FAQ
 

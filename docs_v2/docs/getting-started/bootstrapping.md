@@ -217,4 +217,4 @@ After bootstrapping your accounts, you can:
 
 - Follow the [Quick Start](quick-start.md) guide to deploy your first project
 - Learn about [manifests](../reference/manifests.md) to define your deployments
-- Explore [module development](../reference/module-development.md) to create your own modules
+- Explore [module development](../guides/module-development.md) to create your own modules
