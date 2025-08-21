@@ -1,29 +1,56 @@
-# AI Ops Modules Documentation
+# AIOps Modules
 
-This documentation is automatically generated from the [AWS AIOps Modules](https://github.com/awslabs/aiops-modules) repository.
+The **Artificial Intelligence Operations (AIOps)** modules provide specialized infrastructure components for building AI/ML workloads and data science platforms on AWS. These modules are designed to accelerate the deployment of machine learning infrastructure, model training, and AI operations.
 
+## Repository
 
-## Module Categories
+**Source**: [AWS AIOps Modules](https://github.com/awslabs/aiops-modules)
 
+## Available Modules
 
-### [Agents](./agents/index.md)
+- **[Agents](./agents/index.md)** - AI agent frameworks and demonstration implementations
+- **[EKS](./eks/index.md)** - Ray clusters, operators, and Kubernetes-based ML infrastructure
+- **[Examples](./examples/index.md)** - Complete example implementations and MLOps pipelines
+- **[FMOps](./fmops/index.md)** - Foundation Model Operations with Bedrock and SageMaker JumpStart
+- **[MLflow](./mlflow/index.md)** - Experiment tracking, model registry, and model serving
+- **[SageMaker](./sagemaker/index.md)** - Notebooks, studios, endpoints, and ML CI/CD pipelines
 
-### [Eks](./eks/index.md)
+## Key Features
 
-### [Examples](./examples/index.md)
+- **ML-Focused**: Purpose-built for machine learning and AI workloads
+- **Scalable**: Designed for enterprise-scale ML operations
+- **Integrated**: Works seamlessly with AWS AI/ML services
+- **Best Practices**: Implements MLOps and AIOps best practices
+- **Production Ready**: Battle-tested components for production ML systems
 
-### [Fmops](./fmops/index.md)
+## Usage Example
 
-### [Mlflow](./mlflow/index.md)
+```yaml
+# Deploy a SageMaker Studio environment
+name: ml-studio
+path: git::https://github.com/awslabs/aiops-modules.git//modules/sagemaker/sagemaker-studio?ref=main&depth=1
+targetAccount: primary
+parameters:
+  - name: studio-domain-name
+    value: my-ml-platform
+  - name: enable-projects
+    value: true
+```
 
-### [Sagemaker](./sagemaker/index.md)
+## Common Use Cases
 
+- **ML Platform Setup**: Deploy complete SageMaker environments with notebooks, studios, and endpoints
+- **Model Training**: Set up distributed training with Ray clusters on EKS
+- **MLOps Pipelines**: Implement CI/CD for machine learning models
+- **Experiment Tracking**: Deploy MLflow for experiment management and model registry
+- **Foundation Models**: Deploy and fine-tune foundation models with Bedrock and SageMaker
+- **AI Agents**: Build intelligent automation and autonomous systems
 
+## Getting Started
 
-## About AIOps Modules
+1. **Identify your ML use case** from the categories above
+2. **Review module documentation** for specific AI/ML components
+3. **Configure parameters** for your ML workload requirements
+4. **Deploy using Seed-Farmer** for consistent, repeatable ML infrastructure
 
-The Artificial Intelligence Operations (AIOps) modules are reusable infrastructure components designed to help you build data processing and analytics solutions on AWS.
-
----
-
-*Last updated: Auto-generated from repository*
+For more information about building ML platforms with Seed-Farmer, see the [Module Development Guide](../../guides/module-development.md).
