@@ -259,18 +259,20 @@ npmMirrorSecret: module-specific/npm-credentials
 ### AWS CodeArtifact
 
 Seed-Farmer automatically configures CodeArtifact when available:
-- Detects CodeArtifact domain and repository from seedkit outputs
-- Configures pip and uv to use CodeArtifact
-- Sets up authentication tokens automatically
+
+  - Detects CodeArtifact domain and repository from seedkit outputs
+  - Configures pip and uv to use CodeArtifact
+  - Sets up authentication tokens automatically
 
 ## Docker Registry Authentication
 
 ### Automatic Docker Login
 
 Seed-Farmer automatically handles Docker authentication:
-- AWS ECR login for the target account
-- Docker Hub authentication (if credentials provided)
-- Custom registry authentication via secrets
+
+  - AWS ECR login for the target account
+  - Docker Hub authentication (if credentials provided)
+  - Custom registry authentication via secrets
 
 ### Docker Credentials Secret
 
