@@ -251,6 +251,13 @@ MYAPP_PARAMETER_VPC_ID=vpc-12345678
 MYAPP_PARAMETER_INSTANCE_TYPE=t3.medium
 MYAPP_PARAMETER_SOME_DATABASE_NAME=myapp-db
 ```
+!!! warning "Setting publishGenericEnvVariables to false"
+    Changing publishGenericEnvVariables to false will make your module brittle as it can ONLY be used with projects that have the same name.
+    This is defaulted to true but is available only for backward compatibility.  
+    
+    Do not set this to false. 
+            
+
 
 #### Naming Transformation Rules
 
@@ -294,6 +301,87 @@ SEEDFARMER_DEPLOYMENT_NAME=production
 SEEDFARMER_MODULE_NAME=vpc-network
 SEEDFARMER_GROUP_NAME=networking
 ```
+
+## Working with Data Files
+
+Modules can include additional data files beyond their core infrastructure code using the `dataFiles` field in module manifests. This is useful for configuration files, scripts, certificates, or other assets needed during deployment.
+
+### Data Files Configuration
+
+```yaml
+name: application-module
+path: modules/applications/webapp/
+targetAccount: primary
+dataFiles:
+  - filePath: data/config/app-config.json
+  - filePath: data/scripts/setup.sh
+  - filePath: data/certificates/ca-cert.pem
+  - filePath: templates/deployment.yaml
+parameters:
+  - name: config-file
+    value: app-config.json
+```
+
+### Data Files Structure
+
+Data files are specified relative to your project root and are bundled with the module code during deployment:
+
+```
+project-root/
+├── modules/
+│   └── applications/
+│       └── webapp/
+│           ├── deployspec.yaml
+│           └── app.py
+├── data/
+│   ├── config/
+│   │   └── app-config.json
+│   ├── scripts/
+│   │   └── setup.sh
+│   └── certificates/
+│       └── ca-cert.pem
+└── templates/
+    └── deployment.yaml
+```
+
+### Accessing Data Files in Deployspec
+
+Data files are available in the module's working directory during deployment:
+
+```yaml
+# deployspec.yaml
+deploy:
+  phases:
+    build:
+      commands:
+        # Data files are available in the current directory
+        - ls -la  # Shows bundled data files
+        - cp app-config.json /tmp/config.json
+        - chmod +x setup.sh && ./setup.sh
+        - kubectl apply -f deployment.yaml
+```
+
+### Data Files Best Practices
+
+1. **Use relative paths**: Always specify data file paths relative to the project root
+2. **Organize logically**: Group related data files in appropriate directories (config/, scripts/, templates/)
+3. **Keep files small**: Large data files can slow down module bundling and deployment
+4. **Secure sensitive data**: Consider using AWS Secrets Manager or SSM Parameter Store for sensitive information instead of data files
+5. **Document data file requirements**: Clearly document what data files are required and their expected format in your module's README
+
+### Data Files Persistence Warning
+
+!!! warning "Data Files Persistence Requirements"
+    If you deploy with data files sourced from a local filesystem, you **MUST** provide those same files for future module updates. Seed-Farmer persists bundled code with data files for destroy operations only. Missing data files during updates will cause deployment failures.
+
+### Common Use Cases
+
+- **Configuration files**: Application configuration, environment-specific settings
+- **Scripts**: Setup scripts, initialization scripts, custom deployment logic
+- **Templates**: Kubernetes manifests, CloudFormation templates, configuration templates
+- **Certificates**: SSL certificates, CA certificates (though AWS Certificate Manager is preferred)
+- **Static assets**: Small static files needed by the deployed infrastructure
+
 
 ## Advanced Configuration
 
@@ -426,82 +514,3 @@ parameters:
 
 This structure ensures that the database is created before the application that depends on it, and the application automatically receives the correct database endpoint.
 
-## Working with Data Files
-
-Modules can include additional data files beyond their core infrastructure code using the `dataFiles` field in module manifests. This is useful for configuration files, scripts, certificates, or other assets needed during deployment.
-
-### Data Files Configuration
-
-```yaml
-name: application-module
-path: modules/applications/webapp/
-targetAccount: primary
-dataFiles:
-  - filePath: data/config/app-config.json
-  - filePath: data/scripts/setup.sh
-  - filePath: data/certificates/ca-cert.pem
-  - filePath: templates/deployment.yaml
-parameters:
-  - name: config-file
-    value: app-config.json
-```
-
-### Data Files Structure
-
-Data files are specified relative to your project root and are bundled with the module code during deployment:
-
-```
-project-root/
-├── modules/
-│   └── applications/
-│       └── webapp/
-│           ├── deployspec.yaml
-│           └── app.py
-├── data/
-│   ├── config/
-│   │   └── app-config.json
-│   ├── scripts/
-│   │   └── setup.sh
-│   └── certificates/
-│       └── ca-cert.pem
-└── templates/
-    └── deployment.yaml
-```
-
-### Accessing Data Files in Deployspec
-
-Data files are available in the module's working directory during deployment:
-
-```yaml
-# deployspec.yaml
-deploy:
-  phases:
-    build:
-      commands:
-        # Data files are available in the current directory
-        - ls -la  # Shows bundled data files
-        - cp app-config.json /tmp/config.json
-        - chmod +x setup.sh && ./setup.sh
-        - kubectl apply -f deployment.yaml
-```
-
-### Data Files Best Practices
-
-1. **Use relative paths**: Always specify data file paths relative to the project root
-2. **Organize logically**: Group related data files in appropriate directories (config/, scripts/, templates/)
-3. **Keep files small**: Large data files can slow down module bundling and deployment
-4. **Secure sensitive data**: Consider using AWS Secrets Manager or SSM Parameter Store for sensitive information instead of data files
-5. **Document data file requirements**: Clearly document what data files are required and their expected format in your module's README
-
-### Data Files Persistence Warning
-
-!!! warning "Data Files Persistence Requirements"
-    If you deploy with data files sourced from a local filesystem, you **MUST** provide those same files for future module updates. Seed-Farmer persists bundled code with data files for destroy operations only. Missing data files during updates will cause deployment failures.
-
-### Common Use Cases
-
-- **Configuration files**: Application configuration, environment-specific settings
-- **Scripts**: Setup scripts, initialization scripts, custom deployment logic
-- **Templates**: Kubernetes manifests, CloudFormation templates, configuration templates
-- **Certificates**: SSL certificates, CA certificates (though AWS Certificate Manager is preferred)
-- **Static assets**: Small static files needed by the deployed infrastructure
