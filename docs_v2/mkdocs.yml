@@ -91,15 +91,15 @@ nav:
     - Multi-Account Support: concepts/multi-account.md
   - Guides:
     - guides/index.md
-    - Local Deployments: guides/local-deployments.md
-    - Remote Deployments: guides/remote-deployments.md
     - Project Development: guides/project-development.md
+    - Module Development: guides/module-development.md
+    - Remote Deployments: guides/remote-deployments.md
+    - Local Deployments: guides/local-deployments.md
   - Reference:
     - reference/index.md
     - CLI Commands: reference/cli-commands.md
     - Manifests: reference/manifests.md
     - Deployspec: reference/deployspec.md
-    - Module Development: reference/module-development.md
     - FAQ: reference/faq.md
   - Public Modules:
     - Overview: modules/index.md

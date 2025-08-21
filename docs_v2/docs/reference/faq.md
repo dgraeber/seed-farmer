@@ -28,10 +28,19 @@ Key features include:
 
 ### How do I install Seed-Farmer?
 
-You can install Seed-Farmer using pip:
+The recommended way to install Seed-Farmer is using `uv`:
 
 ```bash
-pip install seed-farmer
+# Install uv if not already installed
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install Seed-Farmer as a tool (recommended)
+uv tool install seed-farmer
+
+# Or create a virtual environment and install
+uv venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+uv pip install seed-farmer
 ```
 
 For more details, see the [Installation](../getting-started/installation.md) guide.
@@ -45,6 +54,7 @@ You need to bootstrap both your toolchain account and target accounts. For detai
 - Python 3.9 or later
 - AWS CLI configured with appropriate credentials
 - AWS CDK (for CDK-based modules)
+- Docker (for local deployments)
 
 ## Deployments
 
@@ -91,7 +101,25 @@ seedfarmer list deployments --project PROJECT_NAME
 To list all modules in a deployment, run:
 
 ```bash
-seedfarmer list modules DEPLOYMENT_NAME --project PROJECT_NAME
+seedfarmer list modules -d DEPLOYMENT_NAME
+```
+
+### How do I deploy locally for development?
+
+You can deploy locally using Docker containers instead of AWS CodeBuild by adding the `--local` flag:
+
+```bash
+seedfarmer apply MANIFEST_PATH --local --env-file .env
+```
+
+Local deployments are faster for development but are limited to single account/region deployments. For more details, see the [Local Deployments](../guides/local-deployments.md) guide.
+
+### How do I destroy a local deployment?
+
+To destroy a local deployment, use the `--local` flag with the destroy command:
+
+```bash
+seedfarmer destroy DEPLOYMENT_NAME --local --env-file .env
 ```
 
 ## Modules
@@ -250,9 +278,31 @@ Make sure the module you're referencing has been deployed and is exporting the m
 
 Make sure you've bootstrapped the toolchain and target accounts with the correct project name and qualifier.
 
-### I'm getting an error about missing AWS CodeSeeder seedkit
+### I'm getting an error about missing seedkit
 
-Seed-Farmer checks if a seedkit is deployed in every account/region mapping defined in the deployment manifest and deploys it if not found. If you're getting an error about a missing seedkit, try deleting the CloudFormation stack and letting Seed-Farmer redeploy it.
+Seed-Farmer automatically deploys the seedkit during the first deployment to each account/region. If you're getting an error about a missing seedkit, you can:
+
+1. Let Seed-Farmer automatically deploy it during your next `seedfarmer apply`
+2. Manually deploy the seedkit:
+   ```bash
+   seedfarmer seedkit deploy myproject --region us-east-1
+   ```
+3. If the seedkit is corrupted, destroy and redeploy it:
+   ```bash
+   seedfarmer seedkit destroy myproject --region us-east-1
+   seedfarmer seedkit deploy myproject --region us-east-1
+   ```
+
+### I'm getting Docker errors during local deployment
+
+Make sure Docker is installed and running on your local machine:
+
+```bash
+docker --version
+docker info
+```
+
+Local deployments require Docker to run CodeBuild-compatible container images. If Docker is not available, use remote deployments instead.
 
 ### I'm getting an error about missing AWS CDK bootstrap
 

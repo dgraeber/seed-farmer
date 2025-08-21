@@ -1,382 +1,212 @@
 # Project Development
 
-# This need to be rewritten...
+This guide covers how to structure and organize Seed-Farmer projects effectively. It focuses on project-level organization, directory structure, and high-level development patterns.
 
-This guide provides best practices and tips for developing projects with Seed-Farmer. It covers organizing your code, managing dependencies, and structuring your manifests.
+## Understanding Seed-Farmer Projects
+
+A Seed-Farmer project is a collection of Infrastructure as Code (IaC) modules organized using GitOps principles. Projects use manifest files to define deployments and orchestrate the deployment of modules across multiple AWS accounts and regions.
+
+### Key Concepts
+
+- **Project**: The top-level container that defines the overall scope and configuration
+- **Deployment**: A specific instance of deployed modules (e.g., dev, staging, prod)
+- **Groups**: Logical collections of related modules within a deployment
+- **Modules**: Individual IaC components that deploy specific AWS resources
+- **Manifests**: YAML files that define the configuration and relationships
 
 ## Project Structure
 
-A typical Seed-Farmer project has the following structure:
+A well-organized Seed-Farmer project follows this recommended structure:
 
 ```
 project-root/
-├── .env                      # Environment variables
-├── manifests/                # Deployment manifests
-│   ├── dev/                  # Development environment
-│   │   ├── deployment.yaml   # Deployment manifest
-│   │   └── modules/          # Module manifests
-│   │       ├── group1.yaml
-│   │       └── group2.yaml
-│   └── prod/                 # Production environment
-│       ├── deployment.yaml
-│       └── modules/
-│           ├── group1.yaml
-│           └── group2.yaml
-├── modules/                  # Module code
-│   ├── group1/
-│   │   ├── module1/
-│   │   │   ├── README.md
-│   │   │   ├── deployspec.yaml
-│   │   │   ├── modulestack.yaml
-│   │   │   └── ...
-│   │   └── module2/
+├── seedfarmer.yaml           # Project configuration file
+├── .env                      # Environment variables (not committed)
+├── README.md                 # Project documentation
+├── manifests/                # Deployment and module manifests
+│   ├── deployment.yaml       # Main deployment manifest
+│   ├── networking-modules.yaml
+│   ├── compute-modules.yaml
+│   ├── storage-modules.yaml
+│   └── database-modules.yaml
+├── modules/                  # Custom module code (optional)
+│   ├── networking/
+│   │   └── custom-vpc/
 │   │       ├── README.md
 │   │       ├── deployspec.yaml
-│   │       ├── modulestack.yaml
-│   │       └── ...
-│   └── group2/
-│       └── ...
-└── README.md                 # Project documentation
+│   │       ├── modulestack.yaml (optional)
+│   │       └── app.py
+│   └── compute/
+│       └── custom-eks/
+│           ├── README.md
+│           ├── deployspec.yaml
+│           └── app.py
+└── data/                     # Data files for modules (optional)
+    ├── config/
+    └── scripts/
 ```
 
-This structure separates the deployment manifests from the module code, allowing you to have different deployment configurations for different environments while reusing the same module code.
+### Project Configuration File
+
+Every Seed-Farmer project must have a `seedfarmer.yaml` file at the root:
+
+```yaml
+project: my-data-platform
+```
+
+This file defines the project name, which is used throughout the deployment process for resource naming and organization.
 
 ## Creating a New Project
 
-# REWRITE THIS
+### Using the CLI (Recommended)
 
-To create a new project, follow these steps:
-
-1. Create the project directory structure
-2. Create the deployment manifests
-3. Create the module manifests
-4. Create the module code
-
-### Creating the Project Directory Structure
+Create a new project using the Seed-Farmer CLI:
 
 ```bash
-seedfarmer init project --name
-cd myproject
+# Create a new project with a specific name
+seedfarmer init project --name my-data-platform
+
+# Navigate to the project directory
+cd my-data-platform
 ```
 
-### Creating the Deployment Manifests
+This command creates the basic project structure with template files.
 
-Create a deployment manifest for each environment:
+### Manual Setup
+
+If you prefer to set up manually:
 
 ```bash
-touch manifests/dev/deployment.yaml
-touch manifests/prod/deployment.yaml
+# Create project directory
+mkdir my-data-platform
+cd my-data-platform
+
+# Create seedfarmer.yaml
+echo "project: my-data-platform" > seedfarmer.yaml
+
+# Create directory structure
+mkdir -p manifests modules data
 ```
 
-Edit the deployment manifests to define the deployment, including groups of modules and target account mappings. For example:
+## Module Sources
+
+Seed-Farmer supports multiple ways to source modules, providing flexibility in how you organize and distribute your infrastructure code:
+
+### Local Filesystem Modules
+
+Reference modules from your local project directory:
 
 ```yaml
-# manifests/dev/deployment.yaml
-name: dev
-toolchainRegion: us-west-2
-forceDependencyRedeploy: False
-groups:
-  - name: core
-    path: manifests/dev/modules/core.yaml
-  - name: services
-    path: manifests/dev/modules/services.yaml
-targetAccountMappings:
-  - alias: primary
-    accountId:
-      valueFrom:
-        envVariable: DEV_ACCOUNT
-    default: true
-    regionMappings:
-      - region: us-east-1
-        default: true
+name: custom-networking
+path: modules/networking/custom-vpc/
+targetAccount: primary
 ```
 
-### Creating the Module Manifests
+### Git Repository Modules
 
-Create a module manifest for each group:
-
-```bash
-seedfarmer init module name
-```
-
-Edit the module manifests to define the modules in each group. For example:
+Reference modules from Git repositories using [Terraform-style syntax](https://developer.hashicorp.com/terraform/language/modules/sources#generic-git-repository):
 
 ```yaml
-# manifests/dev/modules/core.yaml
-name: networking
-path: modules/core/networking/
+# From a specific tag/release
+name: vpc-network
+path: git::https://github.com/awslabs/idf-modules.git//modules/network/basic-cdk?ref=v1.14.0&depth=1
 targetAccount: primary
-parameters:
-  - name: internet-accessible
-    value: true
----
-name: security
-path: modules/core/security/
+
+# From a specific branch
+name: experimental-module
+path: git::https://github.com/myorg/custom-modules.git//modules/compute/experimental?ref=feature-branch&depth=1
 targetAccount: primary
+
+# From a specific commit
+name: stable-module
+path: git::https://github.com/myorg/modules.git//modules/storage/s3?ref=abc123def&depth=1
+targetAccount: primary
+```
+
+### Archive-Based Modules
+
+Reference modules from ZIP or TAR archives over HTTPS:
+
+```yaml
+# From a GitHub release archive
+name: archived-module
+path: archive::https://github.com/awslabs/idf-modules/archive/refs/tags/v1.14.0.tar.gz?module=modules/network/basic-cdk
+targetAccount: primary
+
+# From a custom archive location
+name: custom-archive
+path: archive::https://releases.mycompany.com/modules/v2.1.0/networking-modules.zip?module=vpc-module
+targetAccount: primary
+```
+
+!!! tip "Module Source Best Practices"
+    - **Use specific versions/tags** for production deployments to ensure reproducibility
+    - **Use local modules** for custom code specific to your project
+    - **Use Git modules** for shared modules across multiple projects
+    - **Use archive modules** for distributing modules without Git access
+
+## Working with Data Files
+
+Modules can include additional data files beyond their core infrastructure code using the `dataFiles` field in module manifests. This is useful for configuration files, scripts, certificates, or other assets needed during deployment.
+
+```yaml
+name: application-module
+path: modules/applications/webapp/
+targetAccount: primary
+dataFiles:
+  - filePath: data/config/app-config.json
+  - filePath: data/scripts/setup.sh
+  - filePath: data/certificates/ca-cert.pem
 parameters:
-  - name: enable-guardduty
-    value: true
+  - name: config-file
+    value: app-config.json
 ```
 
-### Creating the Module Code
-
-Create the module code for each module:
-
-```bash
-mkdir -p modules/core/{networking,security}
-```
-
-For each module, create the required files:
-
-```bash
-# Create networking module files
-touch modules/core/networking/README.md
-touch modules/core/networking/deployspec.yaml
-touch modules/core/networking/modulestack.yaml
-
-# Create security module files
-touch modules/core/security/README.md
-touch modules/core/security/deployspec.yaml
-touch modules/core/security/modulestack.yaml
-```
-
-Alternatively, you can use the `seedfarmer init module` command to create the module structure:
-
-```bash
-seedfarmer init module -g core -m networking
-seedfarmer init module -g core -m security
-```
+For detailed information about data files, including project structure, accessing files in deployspec, best practices, and common use cases, see the [Working with Data Files](../reference/manifests.md#working-with-data-files) section in the Manifests Reference.
 
 ## Environment Variables
 
 Create an `.env` file to store environment variables needed for your deployment:
 
 ```bash
-echo DEV_ACCOUNT=123456789012 >> .env
-echo PROD_ACCOUNT=210987654321 >> .env
+# Account IDs
+PRIMARY_ACCOUNT=123456789012
+SECONDARY_ACCOUNT=210987654321
+
+# Environment-specific settings
+ENVIRONMENT=production
+REGION=us-west-2
+
+# Sensitive values (consider using AWS Secrets Manager instead)
+DB_PASSWORD=your-secure-password
 ```
 
-These environment variables can be referenced in your deployment manifests:
-
-```yaml
-targetAccountMappings:
-  - alias: primary
-    accountId:
-      valueFrom:
-        envVariable: DEV_ACCOUNT
-    default: true
-```
-
-## Managing Dependencies
-
-Seed-Farmer manages dependencies between modules, ensuring that modules are deployed in the correct order. Modules can reference outputs from other modules, allowing for complex deployment scenarios.
-
-### Defining Dependencies
-
-Dependencies are defined implicitly through parameter references. For example:
-
-```yaml
-name: database
-path: modules/services/database/
-targetAccount: primary
-parameters:
-  - name: vpc-id
-    valueFrom:
-      moduleMetadata:
-        group: core
-        name: networking
-        key: VpcId
-```
-
-In this example, the `database` module depends on the `networking` module because it references the `VpcId` output from the `networking` module.
-
-### Dependency Resolution
-
-Seed-Farmer resolves dependencies by:
-
-1. Analyzing parameter references to determine dependencies between modules
-2. Sorting modules based on their dependencies
-3. Deploying modules in the correct order
-
-### Circular Dependencies
-
-Seed-Farmer prevents circular dependencies between modules. If a circular dependency is detected, Seed-Farmer will raise an error.
-
-### Force Dependency Redeploy
-
-When a module changes (is redeployed), downstream modules that are dependent on it may need to consume those changes. The `forceDependencyRedeploy` flag in the deployment manifest tells Seed-Farmer to force a redeploy of all modules impacted by the redeploy of another module.
-
-```yaml
-name: dev
-toolchainRegion: us-west-2
-forceDependencyRedeploy: True
-groups:
-  - name: core
-    path: manifests/dev/modules/core.yaml
-  - name: services
-    path: manifests/dev/modules/services.yaml
-```
-
-!!! warning
-    This is an indiscriminate feature that is not granular enough to detect what is causing a redeploy, only that one needs to occur. Any change to a module will trigger a redeploy of that module and all downstream modules that depend on it, even if the underlying logic or artifact has not changed.
+These environment variables can be referenced in your deployment manifests. See the [Manifests Reference](../reference/manifests.md#parameters-and-environment-variables) for detailed parameter configuration options.
 
 ## Multi-Environment Development
 
-Seed-Farmer supports multi-environment development through separate deployment manifests for each environment. This allows you to have different configurations for different environments while reusing the same module code.
-
-### Environment-Specific Manifests
-
-Create separate deployment manifests for each environment:
-
-```
-manifests/
-├── dev/
-│   ├── deployment.yaml
-│   └── modules/
-│       ├── core.yaml
-│       └── services.yaml
-└── prod/
-    ├── deployment.yaml
-    └── modules/
-        ├── core.yaml
-        └── services.yaml
-```
-
-### Environment-Specific Parameters
-
-Use environment-specific parameters in your module manifests:
-
-```yaml
-# manifests/dev/modules/core.yaml
-name: networking
-path: modules/core/networking/
-targetAccount: primary
-parameters:
-  - name: internet-accessible
-    value: true
-  - name: vpc-cidr
-    value: 10.0.0.0/16
-
-# manifests/prod/modules/core.yaml
-name: networking
-path: modules/core/networking/
-targetAccount: primary
-parameters:
-  - name: internet-accessible
-    value: false
-  - name: vpc-cidr
-    value: 172.16.0.0/16
-```
-
-### Environment-Specific Account Mappings
-
-Use environment-specific account mappings in your deployment manifests:
-
-```yaml
-# manifests/dev/deployment.yaml
-targetAccountMappings:
-  - alias: primary
-    accountId:
-      valueFrom:
-        envVariable: DEV_ACCOUNT
-    default: true
-
-# manifests/prod/deployment.yaml
-targetAccountMappings:
-  - alias: primary
-    accountId:
-      valueFrom:
-        envVariable: PROD_ACCOUNT
-    default: true
-```
-
-## Working with Remote Modules
-
-You can reference modules from remote repositories:
-
-```yaml
-name: networking
-path: git::https://github.com/awslabs/idf-modules.git//modules/network/basic-cdk?ref=release/1.0.0&depth=1
-targetAccount: primary
-parameters:
-  - name: internet-accessible
-    value: true
-```
-
-This allows you to use modules from other repositories without having to clone them locally.
-
-### Git Repository References
-
-You can reference a module from a Git repository using the Terraform semantic:
-
-```yaml
-path: git::https://github.com/awslabs/idf-modules.git//modules/network/basic-cdk?ref=release/1.0.0&depth=1
-```
-
-### Archive References
-
-You can reference a module from an archive over HTTPS:
-
-```yaml
-path: archive::https://github.com/awslabs/idf-modules/archive/refs/tags/v1.6.0.tar.gz?module=modules/network/basic-cdk
-```
-
-## Working with Data Files
-
-You can include data files in your module deployment using the `dataFiles` field in the module manifest:
-
-```yaml
-name: networking
-path: modules/core/networking/
-targetAccount: primary
-dataFiles:
-  - filePath: data/test.txt
-  - filePath: config/config.json
-```
-
-These files will be included in the module bundle and available to the module during deployment.
-
-!!! warning
-    If you deploy with data files sourced from a local filesystem, you MUST provide those same files in order to update the module(s) at a later time. Seed-Farmer persists the bundled code with data files, but for destroy ONLY.
+Seed-Farmer supports multi-environment development patterns. For detailed information about managing dependencies, deployment manifests, and environment-specific configurations, see the [Manifests Reference](../reference/manifests.md).
 
 ## Best Practices
 
 ### Project Organization
 
-- **Use a consistent directory structure**: Follow the recommended project structure to make it easier to navigate and understand your project.
-- **Separate manifests by environment**: Create separate deployment manifests for each environment to manage environment-specific configurations.
-- **Group related modules**: Group related modules together to make it easier to understand the relationships between them.
+- **Use a consistent directory structure**: Follow the recommended project structure to make it easier to navigate and understand your project
+- **Use version control**: Track changes to your modules and manifests with Git
+- **Document your project**: Provide clear README files explaining the project structure and deployment process
+- **Separate environments**: Use different deployment manifests for different environments (dev, staging, prod)
 
-### Module Development
+### Module Source Management
 
-- **Use least-privilege permissions**: Define the minimum permissions required for your modules in the `modulestack.yaml` file.
-- **Document your modules**: Provide a comprehensive README.md that describes the module, its inputs, and its outputs.
-- **Use generic environment variables**: If your module is intended to be reused across different projects, set `publishGenericEnvVariables: true` in the deployspec.
-- **Provide sample outputs**: Include sample outputs in your README.md to help users understand what to expect.
-- **Use consistent naming conventions**: Use consistent naming conventions for parameters and outputs to make it easier for users to understand your module.
-- **Handle errors gracefully**: Include error handling in your deployspec commands to ensure that failures are reported clearly.
-- **Test your modules**: Test your modules in isolation before integrating them into a larger deployment.
-- **Use the metadata CLI helper commands**: Use the metadata CLI helper commands to manage and manipulate metadata in your module deployments.
-- **Optimize for reusability**: Design your modules to be reusable across different deployments and projects.
-
-### Dependency Management
-
-- **Be aware of dependencies**: Be aware of and manage the relationships between your modules to assess the impact of changes via redeployment.
-- **Avoid circular dependencies**: Design your modules to avoid circular dependencies.
-- **Use the forceDependencyRedeploy flag judiciously**: The `forceDependencyRedeploy` flag can cause unnecessary redeployments, so use it only when needed.
+- **Pin to specific versions**: Use specific tags or commits for production deployments to ensure reproducibility
+- **Use semantic versioning**: When creating your own modules, follow semantic versioning practices
+- **Test module updates**: Always test module updates in non-production environments first
+- **Organize by functionality**: Group related modules together logically (networking, compute, storage, etc.)
 
 ### Security
 
-- **Use environment variables for sensitive information**: Store account IDs and other sensitive information in environment variables rather than hardcoding them in manifests.
-- **Apply permissions boundaries**: Apply permissions boundaries to the toolchain and deployment roles to further restrict their permissions.
-- **Use IAM path prefixes**: Use IAM path prefixes for the toolchain role, target account deployment roles, and policies to create logical separation.
+- **Use environment variables**: Store sensitive information like account IDs in environment variables, not in manifest files
+- **Apply least privilege**: Use IAM permissions boundaries and minimal permissions for deployment roles
+- **Secure data files**: Be cautious with data files containing sensitive information; consider using AWS Secrets Manager instead
 
-### Deployment
-
-- **Test changes incrementally**: Make small changes and test them incrementally rather than making many changes at once.
-- **Use version control**: Use version control to track changes to your modules and manifests.
-- **Document your deployments**: Document your deployments, including the modules deployed, their configurations, and any dependencies.
-
-## Conclusion
-
-By following the best practices and tips in this guide, you can develop Seed-Farmer projects that are well-organized, maintainable, and secure. The modular architecture of Seed-Farmer allows you to create reusable components that can be composed into complex deployments, while the dependency management system ensures that modules are deployed in the correct order.
+For detailed information about manifests, parameters, dependencies, and deployment patterns, see the [Manifests Reference](../reference/manifests.md).

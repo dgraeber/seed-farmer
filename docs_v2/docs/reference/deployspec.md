@@ -1,0 +1,851 @@
+# Deployspec
+
+The `deployspec.yaml` file is the **execution blueprint** for your module. It defines exactly how your infrastructure code gets deployed and destroyed within AWS CodeBuild. Think of it as the "recipe" that tells Seed-Farmer how to cook your infrastructure.
+
+## What the Deployspec Does
+
+The deployspec serves as the **bridge between your infrastructure code and AWS CodeBuild**. It answers these critical questions:
+
+- **How should the build environment be prepared?** (Installing dependencies, setting up tools)
+- **What commands should run to deploy your infrastructure?** (CDK deploy, CloudFormation, Terraform, etc.)
+- **What commands should run to destroy your infrastructure?** (Cleanup procedures)
+- **What metadata should be exported for other modules to use?** (Outputs and references)
+
+### Key Responsibilities
+
+1. **Environment Setup**: Installs required tools, libraries, and dependencies
+2. **Deployment Execution**: Runs the actual infrastructure deployment commands
+3. **Metadata Management**: Exports outputs that other modules can reference
+4. **Cleanup Operations**: Handles proper resource destruction
+5. **Error Handling**: Manages deployment failures and rollbacks
+
+## Structure and Phases
+
+The deployspec is organized into two main sections (`deploy` and `destroy`), each with four distinct phases:
+
+```yaml
+deploy:
+  phases:
+    install:      # Install dependencies and tools
+      commands:
+        - npm install -g aws-cdk@2.100.0
+        - pip install -r requirements.txt
+    pre_build:    # Pre-deployment setup
+      commands:
+        - echo "Preparing deployment environment"
+        - aws sts get-caller-identity
+    build:        # Main deployment logic
+      commands:
+        - cdk deploy --all --require-approval never
+        - echo "Deployment completed successfully"
+    post_build:   # Post-deployment tasks
+      commands:
+        - echo "Exporting module metadata"
+        - seedfarmer metadata convert
+
+destroy:
+  phases:
+    install:      # Install dependencies for destruction
+      commands:
+        - npm install -g aws-cdk@2.100.0
+        - pip install -r requirements.txt
+    pre_build:    # Pre-destruction setup
+      commands:
+        - echo "Preparing for resource cleanup"
+    build:        # Main destruction logic
+      commands:
+        - cdk destroy --all --force
+        - echo "Resources destroyed successfully"
+    post_build:   # Post-destruction cleanup
+      commands:
+        - echo "Cleanup completed"
+
+# Configuration options
+build_type: BUILD_GENERAL1_MEDIUM
+publishGenericEnvVariables: false
+```
+
+### Phase Execution Order
+
+1. **install**: Set up the build environment with required tools and dependencies
+2. **pre_build**: Perform any setup tasks before the main deployment/destruction
+3. **build**: Execute the primary deployment or destruction commands
+4. **post_build**: Handle post-deployment tasks like metadata export or cleanup
+
+## Environment Variables and Parameters
+
+### How Parameters Become Environment Variables
+
+This is **critically important** for module development: Seed-Farmer automatically converts all parameters from your module manifest into environment variables that are available in your deployspec execution.
+
+### Parameter Naming Convention
+
+The naming convention depends on whether your module is **project-specific** or **generic**:
+
+#### Generic Modules (Default Behavior)
+
+When `publishGenericEnvVariables` is `true` (the default), parameters use the generic `SEEDFARMER_PARAMETER_` prefix:
+
+```yaml
+# In your module manifest
+parameters:
+  - name: vpc-id
+    value: vpc-12345678
+  - name: instance-type
+    value: t3.medium
+  - name: database-name
+    value: myapp-prod-db
+```
+
+**Available in deployspec as**:
+```bash
+SEEDFARMER_PARAMETER_VPC_ID=vpc-12345678
+SEEDFARMER_PARAMETER_INSTANCE_TYPE=t3.medium
+SEEDFARMER_PARAMETER_DATABASE_NAME=myapp-prod-db
+```
+
+### Parameter Name Transformation Rules
+
+Seed-Farmer converts parameter names to environment variables using these transformation rules:
+
+| Parameter Name Style | Example Parameter | Environment Variable (Generic) |
+|---------------------|-------------------|--------------------------------|
+| kebab-case          | `vpc-id`          | `SEEDFARMER_PARAMETER_VPC_ID`  |
+| camelCase           | `vpcId`           | `SEEDFARMER_PARAMETER_VPC_ID`  |
+| PascalCase          | `VpcId`           | `SEEDFARMER_PARAMETER_VPC_ID`  |
+| snake_case          | `vpc_id`          | `SEEDFARMER_PARAMETER_VPC_ID`  |
+| Mixed styles        | `some-Complex_Name` | `SEEDFARMER_PARAMETER_SOME_COMPLEX_NAME` |
+
+**Key Points**:
+- All parameter names are converted to **UPPER_SNAKE_CASE**
+- Hyphens (`-`), underscores (`_`), and camelCase boundaries become underscores
+- Generic modules use the `SEEDFARMER_PARAMETER_` prefix
+- This makes modules reusable across different projects
+
+### System Environment Variables
+
+Seed-Farmer also provides system-level information as environment variables:
+
+```bash
+SEEDFARMER_PROJECT_NAME=myapp
+SEEDFARMER_DEPLOYMENT_NAME=production
+SEEDFARMER_MODULE_NAME=vpc-network
+SEEDFARMER_GROUP_NAME=networking
+AWS_ACCOUNT_ID=123456789012
+AWS_DEFAULT_REGION=us-east-1
+```
+
+## Using Parameters in Your Deployspec
+
+### Basic Parameter Usage
+
+```yaml
+deploy:
+  phases:
+    build:
+      commands:
+        # Reference parameters directly
+        - echo "Deploying VPC: $SEEDFARMER_PARAMETER_VPC_ID"
+        - echo "Instance type: $SEEDFARMER_PARAMETER_INSTANCE_TYPE"
+        
+        # Use in CDK deployment
+        - cdk deploy VpcStack --parameters VpcId=$SEEDFARMER_PARAMETER_VPC_ID
+        
+        # Use in CloudFormation
+        - aws cloudformation deploy \
+            --template-file template.yaml \
+            --stack-name my-stack \
+            --parameter-overrides \
+              VpcId=$SEEDFARMER_PARAMETER_VPC_ID \
+              InstanceType=$SEEDFARMER_PARAMETER_INSTANCE_TYPE
+```
+
+### Advanced Parameter Usage
+
+```yaml
+deploy:
+  phases:
+    pre_build:
+      commands:
+        # Validate required parameters
+        - |
+          if [ -z "$SEEDFARMER_PARAMETER_VPC_ID" ]; then
+            echo "ERROR: VPC ID parameter is required"
+            exit 1
+          fi
+        
+        # Transform parameters for use
+        - export SUBNET_IDS=$(echo $SEEDFARMER_PARAMETER_SUBNET_IDS | tr ',' ' ')
+        
+    build:
+      commands:
+        # Use parameters in complex commands
+        - |
+          cdk deploy NetworkStack \
+            --parameters VpcId=$SEEDFARMER_PARAMETER_VPC_ID \
+            --parameters SubnetIds="$SEEDFARMER_PARAMETER_SUBNET_IDS" \
+            --parameters Environment=$SEEDFARMER_PARAMETER_ENVIRONMENT \
+            --outputs-file cdk-outputs.json
+```
+
+### Working with JSON Parameters
+
+When parameters contain JSON data, you can parse them using `jq`:
+
+```yaml
+deploy:
+  phases:
+    build:
+      commands:
+        # Parse JSON parameter
+        - export DB_HOST=$(echo $SEEDFARMER_PARAMETER_DATABASE_CONFIG | jq -r '.host')
+        - export DB_PORT=$(echo $SEEDFARMER_PARAMETER_DATABASE_CONFIG | jq -r '.port')
+        
+        # Use parsed values
+        - echo "Connecting to database at $DB_HOST:$DB_PORT"
+```
+
+## Configuration Options
+
+### Build Type
+
+Control the compute resources for your CodeBuild environment:
+
+```yaml
+build_type: BUILD_GENERAL1_LARGE
+```
+
+**Available options**:
+- `BUILD_GENERAL1_SMALL`: 3 GB memory, 2 vCPUs
+- `BUILD_GENERAL1_MEDIUM`: 7 GB memory, 4 vCPUs  
+- `BUILD_GENERAL1_LARGE`: 15 GB memory, 8 vCPUs
+- `BUILD_GENERAL1_2XLARGE`: 145 GB memory, 72 vCPUs
+
+### Generic Modules
+
+```yaml
+# For generic modules (default and recommended)
+publishGenericEnvVariables: true
+```
+
+Generic modules are the recommended approach as they:
+
+- Create reusable infrastructure components
+- Work across different projects without modification
+- Use the `SEEDFARMER_PARAMETER_*` naming convention
+- Promote modularity and code reuse
+
+## Metadata Management
+
+### How Module Metadata Works
+
+Seed-Farmer uses a metadata system that allows modules to export outputs that other modules can reference as inputs. This creates a dependency chain where modules can consume outputs from previously deployed modules.
+
+#### The Metadata File System
+
+When your deployspec runs, Seed-Farmer automatically creates a metadata file that your module writes to.
+
+**For Generic Modules (Default)**:
+- Environment variable: `SEEDFARMER_MODULE_METADATA`
+- File location: `module/SEEDFARMER_MODULE_METADATA`
+
+#### How to Export Module Outputs
+
+There are several ways to export metadata from your module:
+
+### Method 1: Using seedfarmer metadata Commands (Recommended)
+
+The `seedfarmer metadata` commands automatically handle the metadata file creation and management:
+
+```yaml
+deploy:
+  phases:
+    post_build:
+      commands:
+        # Export CDK outputs automatically
+        - cdk deploy --outputs-file cdk-outputs.json
+        - seedfarmer metadata convert
+        
+        # Add custom key-value metadata
+        - seedfarmer metadata add -k VpcId -v vpc-12345678
+        - seedfarmer metadata add -k DatabaseEndpoint -v mydb.cluster-xyz.us-east-1.rds.amazonaws.com
+        
+        # Add complex JSON metadata
+        - seedfarmer metadata add -j '{"SubnetIds": ["subnet-123", "subnet-456"], "SecurityGroupId": "sg-789"}'
+```
+
+### Method 2: Direct Environment Variable Export
+
+You can also export metadata directly by setting the metadata environment variable:
+
+```yaml
+deploy:
+  phases:
+    post_build:
+      commands:
+        # For generic modules
+        - export SEEDFARMER_MODULE_METADATA='{"VpcId": "vpc-12345678", "SubnetIds": ["subnet-123", "subnet-456"]}'
+        
+        # For project-specific modules
+        - export SEEDFARMER_MODULE_METADATA='{"VpcId": "vpc-12345678", "SubnetIds": ["subnet-123", "subnet-456"]}'
+```
+
+### Method 3: Writing to the Metadata File Directly
+
+Advanced users can write directly to the metadata file:
+
+```yaml
+deploy:
+  phases:
+    post_build:
+      commands:
+        # Create metadata JSON
+        - |
+          cat > module/$SEEDFARMER_MODULE_METADATA << EOF
+          {
+            "VpcId": "vpc-12345678",
+            "DatabaseEndpoint": "mydb.cluster-xyz.us-east-1.rds.amazonaws.com",
+            "SubnetIds": ["subnet-123", "subnet-456"]
+          }
+          EOF
+```
+
+### Metadata CLI Commands
+
+Seed-Farmer provides helper commands for metadata management:
+
+```bash
+# Convert CDK outputs to Seed-Farmer metadata format
+seedfarmer metadata convert
+
+# Add key-value metadata
+seedfarmer metadata add -k MyKey -v MyValue
+
+# Add JSON metadata
+seedfarmer metadata add -j '{"key": "value"}'
+
+# Get the full module deployment name
+seedfarmer metadata depmod
+
+# Get parameter values
+seedfarmer metadata paramvalue -s DEPLOYMENT_NAME
+```
+
+#### seedfarmer metadata convert
+
+This command is specifically designed for CDK deployments and is **REQUIRED** if you want to persist metadata for other modules to consume. It automatically extracts outputs from CDK and converts them to Seed-Farmer metadata format.
+
+**Important**: You MUST use `seedfarmer metadata convert` to persist metadata. Simply creating CDK outputs is not sufficient - the convert command is what actually stores the metadata in the Seed-Farmer system.
+
+```yaml
+deploy:
+  phases:
+    build:
+      commands:
+        # Deploy CDK with outputs file
+        - cdk deploy --all --require-approval never --outputs-file cdk-outputs.json
+    post_build:
+      commands:
+        # REQUIRED: Convert CDK outputs to metadata (looks for the module's specific outputs)
+        - seedfarmer metadata convert
+        
+        # Or specify a different file
+        - seedfarmer metadata convert -f my-custom-outputs.json
+        
+        # Or use jq to extract specific data
+        - seedfarmer metadata convert -jq '.MyStack.metadata'
+```
+
+#### CDK Output Structure for Metadata
+
+When using CDK, your stack must export a `metadata` output with a specific structure. The `seedfarmer metadata convert` command expects the CDK outputs file to contain a key matching your module's deployment name, with a nested `metadata` field.
+
+Here's the correct pattern:
+
+```python
+# In your CDK stack
+from aws_cdk import CfnOutput, Stack
+
+class MyStack(Stack):
+    def __init__(self, scope, construct_id, **kwargs):
+        super().__init__(scope, construct_id, **kwargs)
+        
+        # ... your infrastructure code ...
+        
+        # Export metadata as a CDK output - this creates the required structure
+        CfnOutput(
+            scope=self,
+            id="metadata",
+            value=Stack.to_json_string(
+                self,
+                {
+                    "VpcId": self.vpc.vpc_id,
+                    "SecurityGroupId": self.security_group.security_group_id,
+                    "PublicSubnetIds": self.public_subnets.subnet_ids,
+                    "PrivateSubnetIds": self.private_subnets.subnet_ids,
+                    "IsolatedSubnetIds": self.isolated_subnets.subnet_ids if not self.internet_accessible else [],
+                    "LocalZonePrivateSubnetIds": [s.subnet_id for s in self.local_zone_private_subnets] 
+                        if hasattr(self, "local_zone_private_subnets") else [],
+                    "LocalZonePublicSubnetIds": [s.subnet_id for s in self.local_zone_public_subnets] 
+                        if hasattr(self, "local_zone_public_subnets") else [],
+                }
+            ),
+        )
+```
+
+**Expected CDK Output File Structure:**
+
+The `seedfarmer metadata convert` command expects the CDK outputs file to have this structure:
+
+```json
+{
+  "project-deployment-module": {
+    "metadata": "{\"VpcId\": \"vpc-12345678\", \"SecurityGroupId\": \"sg-87654321\", \"PublicSubnetIds\": [\"subnet-123\", \"subnet-456\"], \"PrivateSubnetIds\": [\"subnet-789\", \"subnet-012\"]}"
+  }
+}
+```
+
+**Critical Requirements:**
+- `project-deployment-module` is the full module deployment name (format: `{project}-{deployment}-{module}`)
+- The `metadata` field must contain a **JSON string** (not a JSON object)
+- The JSON string contains your actual metadata values as a serialized JSON object
+- The `Stack.to_json_string()` method in CDK automatically creates this JSON string format
+- The `seedfarmer metadata convert` command extracts this JSON string and parses it to store the metadata
+
+#### seedfarmer metadata add
+
+Add individual key-value pairs or JSON objects to the metadata:
+
+```yaml
+deploy:
+  phases:
+    post_build:
+      commands:
+        # Add simple key-value pairs
+        - seedfarmer metadata add -k VpcId -v $VPC_ID
+        - seedfarmer metadata add -k Region -v $AWS_DEFAULT_REGION
+        
+        # Add complex JSON data
+        - seedfarmer metadata add -j '{"Subnets": {"Public": ["subnet-123"], "Private": ["subnet-456"]}}'
+        
+        # Add data from command output
+        - ENDPOINT=$(aws rds describe-db-clusters --query 'DBClusters[0].Endpoint' --output text)
+        - seedfarmer metadata add -k DatabaseEndpoint -v $ENDPOINT
+```
+
+### Important Metadata Guidelines
+
+#### 1. Metadata Must Be JSON
+
+All metadata must be valid JSON. Seed-Farmer stores and retrieves metadata as JSON objects:
+
+```yaml
+# ✅ Good - Valid JSON
+- seedfarmer metadata add -j '{"VpcId": "vpc-123", "SubnetCount": 4}'
+
+# ❌ Bad - Invalid JSON (single quotes, unquoted keys)
+- seedfarmer metadata add -j "{VpcId: 'vpc-123', SubnetCount: 4}"
+```
+
+#### 2. Use Consistent Naming Conventions
+
+Use consistent, descriptive names for your metadata keys:
+
+```yaml
+# ✅ Good - Clear, consistent naming
+- seedfarmer metadata add -k VpcId -v vpc-12345678
+- seedfarmer metadata add -k DatabaseEndpoint -v mydb.cluster-xyz.us-east-1.rds.amazonaws.com
+- seedfarmer metadata add -k SubnetIds -v '["subnet-123", "subnet-456"]'
+
+# ❌ Bad - Inconsistent, unclear naming
+- seedfarmer metadata add -k vpc -v vpc-12345678
+- seedfarmer metadata add -k db_endpoint -v mydb.cluster-xyz.us-east-1.rds.amazonaws.com
+- seedfarmer metadata add -k subnets -v '["subnet-123", "subnet-456"]'
+```
+
+#### 3. Document Your Metadata Outputs
+
+Always document what metadata your module exports in your README.md:
+
+```markdown
+### Module Metadata Outputs
+
+- `VpcId`: The ID of the created VPC
+- `DatabaseEndpoint`: The RDS cluster endpoint URL
+- `SubnetIds`: Array of subnet IDs created in the VPC
+- `SecurityGroupId`: The ID of the default security group
+
+#### Output Example
+
+```json
+{
+  "VpcId": "vpc-12345678",
+  "DatabaseEndpoint": "mydb.cluster-xyz.us-east-1.rds.amazonaws.com",
+  "SubnetIds": ["subnet-123", "subnet-456"],
+  "SecurityGroupId": "sg-789"
+}
+```
+
+### Complete Metadata Export Examples
+
+#### CDK Module with Automatic Conversion
+
+```yaml
+deploy:
+  phases:
+    build:
+      commands:
+        - cdk deploy --all --require-approval never --outputs-file cdk-outputs.json
+    post_build:
+      commands:
+        # Automatically convert CDK outputs
+        - seedfarmer metadata convert
+        
+        # Add additional custom metadata
+        - seedfarmer metadata add -k DeploymentTimestamp -v $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        - seedfarmer metadata add -k ModuleVersion -v "1.2.3"
+```
+
+#### Terraform Module with Manual Export
+
+```yaml
+deploy:
+  phases:
+    build:
+      commands:
+        - terraform apply -auto-approve
+        - terraform output -json > terraform-outputs.json
+    post_build:
+      commands:
+        # Extract Terraform outputs and add to metadata
+        - VPC_ID=$(terraform output -raw vpc_id)
+        - DB_ENDPOINT=$(terraform output -raw database_endpoint)
+        - SUBNET_IDS=$(terraform output -json subnet_ids)
+        
+        - seedfarmer metadata add -k VpcId -v $VPC_ID
+        - seedfarmer metadata add -k DatabaseEndpoint -v $DB_ENDPOINT
+        - seedfarmer metadata add -k SubnetIds -v "$SUBNET_IDS"
+```
+
+#### CloudFormation Module with Stack Outputs
+
+```yaml
+deploy:
+  phases:
+    build:
+      commands:
+        - aws cloudformation deploy --template-file template.yaml --stack-name $STACK_NAME
+    post_build:
+      commands:
+        # Get CloudFormation stack outputs
+        - |
+          aws cloudformation describe-stacks --stack-name $STACK_NAME \
+            --query 'Stacks[0].Outputs' --output json > cfn-outputs.json
+        
+        # Convert to metadata format
+        - VPC_ID=$(jq -r '.[] | select(.OutputKey=="VpcId") | .OutputValue' cfn-outputs.json)
+        - DB_ENDPOINT=$(jq -r '.[] | select(.OutputKey=="DatabaseEndpoint") | .OutputValue' cfn-outputs.json)
+        
+        - seedfarmer metadata add -k VpcId -v $VPC_ID
+        - seedfarmer metadata add -k DatabaseEndpoint -v $DB_ENDPOINT
+```
+
+### Troubleshooting Metadata Issues
+
+#### Common Problems and Solutions
+
+1. **Metadata not appearing in dependent modules**
+   - Ensure you're exporting metadata in the `post_build` phase
+   - Verify the metadata is valid JSON
+   - Check that the metadata file is being created in the correct location
+
+2. **CDK convert command not working**
+   - Ensure your CDK outputs file contains the expected structure
+   - Use `seedfarmer metadata depmod` to get the correct module key
+   - Try using the `-jq` option to specify the exact path to your data
+
+3. **JSON parsing errors**
+   - Validate your JSON using `jq` or online JSON validators
+   - Escape quotes properly in shell commands
+   - Use single quotes around JSON strings in YAML
+
+#### Debugging Metadata
+
+You can debug metadata issues by examining the files and environment variables:
+
+```yaml
+deploy:
+  phases:
+    post_build:
+      commands:
+        # Debug: Show metadata environment variable name
+        - echo "Metadata env var: $SEEDFARMER_MODULE_METADATA"
+        
+        # Debug: Show metadata file location
+        - echo "Metadata file: module/$SEEDFARMER_MODULE_METADATA"
+        
+        # Debug: Show current metadata content
+        - cat module/$SEEDFARMER_MODULE_METADATA || echo "No metadata file found"
+        
+        # Add your metadata
+        - seedfarmer metadata add -k VpcId -v vpc-12345678
+        
+        # Debug: Show final metadata content
+        - cat module/$SEEDFARMER_MODULE_METADATA
+```
+
+## Complete Examples
+
+### CDK-Based Module
+
+```yaml
+deploy:
+  phases:
+    install:
+      commands:
+        - npm install -g aws-cdk@2.100.0
+        - pip install -r requirements.txt
+    pre_build:
+      commands:
+        - echo "Starting CDK deployment"
+        - echo "VPC ID: $SEEDFARMER_PARAMETER_VPC_ID"
+        - echo "Environment: $SEEDFARMER_PARAMETER_ENVIRONMENT"
+    build:
+      commands:
+        - cdk deploy --all --require-approval never --outputs-file cdk-outputs.json
+        - echo "CDK deployment completed"
+    post_build:
+      commands:
+        - seedfarmer metadata convert
+        - echo "Metadata exported successfully"
+
+destroy:
+  phases:
+    install:
+      commands:
+        - npm install -g aws-cdk@2.100.0
+        - pip install -r requirements.txt
+    build:
+      commands:
+        - cdk destroy --all --force
+
+build_type: BUILD_GENERAL1_MEDIUM
+publishGenericEnvVariables: true
+```
+
+### Terraform Module
+
+```yaml
+deploy:
+  phases:
+    install:
+      commands:
+        - wget https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
+        - unzip terraform_1.5.0_linux_amd64.zip
+        - mv terraform /usr/local/bin/
+    pre_build:
+      commands:
+        - terraform init
+        - echo "VPC ID: $SEEDFARMER_PARAMETER_VPC_ID"
+    build:
+      commands:
+        - terraform plan -var="vpc_id=$SEEDFARMER_PARAMETER_VPC_ID"
+        - terraform apply -auto-approve -var="vpc_id=$SEEDFARMER_PARAMETER_VPC_ID"
+        - terraform output -json > terraform-outputs.json
+    post_build:
+      commands:
+        - |
+          # Convert Terraform outputs to Seed-Farmer metadata
+          OUTPUTS=$(cat terraform-outputs.json)
+          seedfarmer metadata add -j "$OUTPUTS"
+
+destroy:
+  phases:
+    install:
+      commands:
+        - wget https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
+        - unzip terraform_1.5.0_linux_amd64.zip
+        - mv terraform /usr/local/bin/
+    pre_build:
+      commands:
+        - terraform init
+    build:
+      commands:
+        - terraform destroy -auto-approve -var="vpc_id=$SEEDFARMER_PARAMETER_VPC_ID"
+
+build_type: BUILD_GENERAL1_SMALL
+publishGenericEnvVariables: true
+```
+
+### CloudFormation Module
+
+```yaml
+deploy:
+  phases:
+    pre_build:
+      commands:
+        - echo "Deploying CloudFormation stack"
+        - echo "Stack name: $SEEDFARMER_PARAMETER_STACK_NAME"
+    build:
+      commands:
+        - |
+          aws cloudformation deploy \
+            --template-file template.yaml \
+            --stack-name $SEEDFARMER_PARAMETER_STACK_NAME \
+            --parameter-overrides \
+              VpcId=$SEEDFARMER_PARAMETER_VPC_ID \
+              InstanceType=$SEEDFARMER_PARAMETER_INSTANCE_TYPE \
+            --capabilities CAPABILITY_IAM
+        
+        # Export stack outputs
+        - |
+          aws cloudformation describe-stacks \
+            --stack-name $SEEDFARMER_PARAMETER_STACK_NAME \
+            --query 'Stacks[0].Outputs' > cfn-outputs.json
+    post_build:
+      commands:
+        - |
+          # Convert CloudFormation outputs to metadata
+          OUTPUTS=$(jq -r 'map({(.OutputKey): .OutputValue}) | add' cfn-outputs.json)
+          seedfarmer metadata add -j "$OUTPUTS"
+
+destroy:
+  phases:
+    build:
+      commands:
+        - aws cloudformation delete-stack --stack-name $SEEDFARMER_PARAMETER_STACK_NAME
+        - |
+          aws cloudformation wait stack-delete-complete \
+            --stack-name $SEEDFARMER_PARAMETER_STACK_NAME
+
+build_type: BUILD_GENERAL1_SMALL
+publishGenericEnvVariables: true
+```
+
+## Best Practices
+
+### Parameter Handling
+
+1. **Always validate required parameters** in the `pre_build` phase
+2. **Use descriptive parameter names** that clearly indicate their purpose
+3. **Handle JSON parameters carefully** using `jq` for parsing
+4. **Set default values** when appropriate to make modules more flexible
+5. **Document parameter requirements** in your module's README
+
+### Error Handling
+
+```yaml
+deploy:
+  phases:
+    pre_build:
+      commands:
+        # Validate required parameters
+        - |
+          if [ -z "$SEEDFARMER_PARAMETER_VPC_ID" ]; then
+            echo "ERROR: VPC ID is required but not provided"
+            exit 1
+          fi
+        
+        # Validate parameter format
+        - |
+          if [[ ! $SEEDFARMER_PARAMETER_VPC_ID =~ ^vpc-[a-f0-9]{8,17}$ ]]; then
+            echo "ERROR: Invalid VPC ID format: $SEEDFARMER_PARAMETER_VPC_ID"
+            exit 1
+          fi
+    build:
+      commands:
+        # Use error handling in deployment commands
+        - cdk deploy --all --require-approval never || exit 1
+        - echo "Deployment successful"
+```
+
+### Metadata Export
+
+1. **Always export relevant outputs** that other modules might need
+2. **Use consistent naming conventions** for exported metadata
+3. **Include both simple values and complex objects** as needed
+4. **Document exported metadata** in your module's README
+5. **Test metadata consumption** by dependent modules
+
+### Security Considerations
+
+1. **Never log sensitive parameters** like passwords or API keys
+2. **Use AWS Secrets Manager** for sensitive configuration
+3. **Validate input parameters** to prevent injection attacks
+4. **Use least-privilege IAM roles** in your modulestack.yaml
+5. **Sanitize user inputs** before using them in commands
+
+### Performance Optimization
+
+1. **Choose appropriate build types** based on your module's resource needs
+2. **Cache dependencies** when possible to speed up builds
+3. **Use parallel operations** where safe to do so
+4. **Minimize network calls** during deployment
+5. **Clean up temporary files** to avoid storage issues
+
+## Common Patterns
+
+### Conditional Deployment
+
+```yaml
+deploy:
+  phases:
+    build:
+      commands:
+        - |
+          if [ "$SEEDFARMER_PARAMETER_ENABLE_MONITORING" = "true" ]; then
+            echo "Deploying monitoring stack"
+            cdk deploy MonitoringStack
+          else
+            echo "Skipping monitoring deployment"
+          fi
+```
+
+### Multi-Stack Deployment
+
+```yaml
+deploy:
+  phases:
+    build:
+      commands:
+        # Deploy stacks in order
+        - cdk deploy NetworkStack --outputs-file network-outputs.json
+        - cdk deploy ComputeStack --outputs-file compute-outputs.json
+        - cdk deploy ApplicationStack --outputs-file app-outputs.json
+    post_build:
+      commands:
+        # Combine all outputs
+        - |
+          jq -s 'add' *-outputs.json > combined-outputs.json
+          OUTPUTS=$(cat combined-outputs.json)
+          seedfarmer metadata add -j "$OUTPUTS"
+```
+
+### Environment-Specific Configuration
+
+```yaml
+deploy:
+  phases:
+    pre_build:
+      commands:
+        - |
+          case "$SEEDFARMER_PARAMETER_ENVIRONMENT" in
+            "dev")
+              export INSTANCE_TYPE="t3.micro"
+              export MIN_CAPACITY="1"
+              ;;
+            "prod")
+              export INSTANCE_TYPE="t3.large"
+              export MIN_CAPACITY="3"
+              ;;
+            *)
+              echo "Unknown environment: $SEEDFARMER_PARAMETER_ENVIRONMENT"
+              exit 1
+              ;;
+          esac
+    build:
+      commands:
+        - cdk deploy --parameters InstanceType=$INSTANCE_TYPE --parameters MinCapacity=$MIN_CAPACITY
+```
+
+The deployspec is your module's execution engine. By understanding how parameters are transformed into environment variables and following these patterns, you can create robust, reusable infrastructure modules that integrate seamlessly with Seed-Farmer's orchestration capabilities.

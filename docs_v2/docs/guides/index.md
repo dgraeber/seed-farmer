@@ -2,18 +2,24 @@
 
 This section provides how-to guides for common tasks with Seed-Farmer. These guides are designed to help you accomplish specific goals and solve common problems.
 
-## Local Deployments
-
-The [Local Deployments](local-deployments.md) guide explains how to deploy Seed-Farmer projects locally for development and testing purposes. It uses an AWS Codebuild Local image with Docker to deploy artifacts.  This is useful for testing changes before deploying to production environments.
-
-
-## Remote Deployments
-
-The [Remote Deployments](remote-deployments.md) guide explains how to deploy Seed-Farmer projects locally for development and testing purposes. It uses an AWS Codebuild Local image with Docker to deploy artifacts.  This is useful for testing changes before deploying to production environments.
 
 ## Project Development
 
-The [Project Development](project-development.md) guide provides best practices and tips for developing projects with Seed-Farmer. This includes organizing your code, managing dependencies, and structuring your manifests.
+The [Project Development](project-development.md) guide covers how to structure and organize Seed-Farmer projects. It includes best practices for project organization, managing multi-environment deployments, working with dependencies between modules, and using environment variables and remote modules effectively.
+
+## Module Development
+
+The [Module Development](module-development.md) guide provides comprehensive information on creating individual modules for Seed-Farmer. It covers required files (deployspec.yaml, README.md), optional files (modulestack.yaml), deployspec structure and parameters, metadata management, and best practices for creating reusable, generic modules.
+
+## Local Deployments
+
+The [Local Deployments](local-deployments.md) guide explains how to deploy Seed-Farmer projects locally for development and testing purposes. It covers environment setup, working with local and remote modules, using data files, and best practices for iterative development and testing before production deployment.
+
+## Remote Deployments
+
+The [Remote Deployments](remote-deployments.md) guide covers deploying Seed-Farmer projects using AWS CodeBuild in the cloud. It explains how AWS CodeSeeder orchestrates remote deployments, working with different CodeBuild images, image overrides, and the deployment process in AWS environments.
+
+
 
 ## Common Tasks
 
@@ -55,7 +61,7 @@ Seed-Farmer supports deploying across multiple AWS accounts. The [Multi-Account 
 
 ### Custom Module Development
 
-For information on developing custom modules, see the [Module Development](../reference/module-development.md) reference.
+For information on developing custom modules, see the [Module Development](module-development.md) reference.
 
 ### Troubleshooting
 
