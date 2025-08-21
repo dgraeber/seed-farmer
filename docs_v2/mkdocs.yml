@@ -98,6 +98,7 @@ nav:
     - reference/index.md
     - CLI Commands: reference/cli-commands.md
     - Manifests: reference/manifests.md
+    - Deployspec: reference/deployspec.md
     - Module Development: reference/module-development.md
     - FAQ: reference/faq.md
   - Public Modules:

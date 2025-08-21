@@ -94,57 +94,20 @@ The currently supported values are:
 
 #### Generic Environment Variables
 
-The `publishGenericEnvVariables` parameter defaults to `false`, implying the prefix of the project to the pertinent environment parameters in the CodeBuild environment. When developing generic modules (modules for reuse regardless of project), this parameter MUST be set to `true`.
+The `publishGenericEnvVariables` parameter defaults to `true`, creating generic modules that use the `SEEDFARMER_` prefix for environment variables. This is the **recommended approach** for all new modules as it makes them reusable across different projects.
 
-When creating a module, builders can specify the optional `publishGenericEnvVariables` attribute in the module deployspec.yaml. When set to true, the environment variables passed to CodeBuild for Seed-Farmer metadata (ProjectName, DeploymentName, ModuleName, etc.) are prefixed with `SEEDFARMER_` rather than the UPPER ProjectName.
+When creating a module, the default behavior prefixes environment variables with `SEEDFARMER_` rather than the project name. For example:
 
-For example, from the included exampleproj project in examples:
-- `EXAMPLEPROJ_DEPLOYMENT_NAME` would be `SEEDFARMER_DEPLOYMENT_NAME`
-- `EXAMPLEPROJ_PARAMETER_SOME_PARAMETER` would be `SEEDFARMER_PARAMETER_SOME_PARAMETER`
+- System variables: `SEEDFARMER_DEPLOYMENT_NAME`, `SEEDFARMER_MODULE_NAME`
+- Parameters: `SEEDFARMER_PARAMETER_VPC_ID`, `SEEDFARMER_PARAMETER_INSTANCE_TYPE`
+
+**Legacy project-specific modules**: When `publishGenericEnvVariables: false` is explicitly set, parameters are prefixed with the project name (e.g., `EXAMPLEPROJ_PARAMETER_SOME_PARAMETER`). This approach is **strongly discouraged** for new modules.
 
 ### Example Deployspec
 
-The following is an example deployspec that issues a series of commands. This is a project-specific module with a project named `MYAPP`:
+#### Generic Module (Recommended)
 
-```yaml
-deploy:
-  phases:
-    install:
-      commands:
-        - npm install -g aws-cdk@2.20.0
-        - apt-get install jq
-        - pip install -r requirements.txt
-    build:
-      commands:
-        - aws iam create-service-linked-role --aws-service-name elasticmapreduce.amazonaws.com || true
-        - export ECR_REPO_NAME=$(echo $MYAPP_PARAMETER_FARGATE | jq -r '."ecr-repository-name"')
-        - aws ecr describe-repositories --repository-names ${ECR_REPO_NAME} || aws ecr create-repository --repository-name ${ECR_REPO_NAME}
-        - export IMAGE_NAME=$(echo $MYAPP_PARAMETER_FARGATE | jq -r '."image-name"')
-        - export COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-        - export IMAGE_TAG=${COMMIT_HASH:=latest}
-        - export REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPO_NAME
-        - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-        - >
-          echo "MYAPP_PARAMETER_SHARED_BUCKET_NAME: ${MYAPP_PARAMETER_SHARED_BUCKET_NAME}"
-        - echo Building the Docker image...          
-        - cd service/ && docker build -t $REPOSITORY_URI:latest .
-        - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
-        - docker push $REPOSITORY_URI:latest && docker push $REPOSITORY_URI:$IMAGE_TAG
-        - cd.. && cdk deploy --all --require-approval never --progress events --app "python app.py" --outputs-file ./cdk-exports.json
-        - export MYAPP_MODULE_METADATA=$(python -c "import json; file=open('cdk-exports.json'); print(json.load(file)['myapp-${MYAPP_DEPLOYMENT_NAME}-${MYAPP_MODULE_NAME}']['metadata'])")
-destroy:
-  phases:
-    install:
-      commands:
-      - npm install -g aws-cdk@2.20.0
-      - pip install -r requirements.txt
-    build:
-      commands:
-      - cdk destroy --all --force --app "python app.py"
-build_type: BUILD_GENERAL1_LARGE
-```
-
-The following is an example deployspec for a generic module:
+The following is an example deployspec for a **generic module** (the recommended approach):
 
 ```yaml
 deploy:
@@ -170,8 +133,8 @@ deploy:
         - cd service/ && docker build -t $REPOSITORY_URI:latest .
         - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
         - docker push $REPOSITORY_URI:latest && docker push $REPOSITORY_URI:$IMAGE_TAG
-        - cd.. && cdk deploy --all --require-approval never --progress events --app "python app.py" --outputs-file ./cdk-exports.json
-        - export SEEDFARMER_MODULE_METADATA=$(python -c "import json; file=open('cdk-exports.json'); print(json.load(file)['seedfarmer-${SEEDFARMER_DEPLOYMENT_NAME}-${SEEDFARMER_MODULE_NAME}']['metadata'])")
+        - cd.. && cdk deploy --all --require-approval never --outputs-file ./cdk-exports.json
+        - seedfarmer metadata convert
 destroy:
   phases:
     install:
@@ -182,7 +145,50 @@ destroy:
       commands:
       - cdk destroy --all --force --app "python app.py"
 build_type: BUILD_GENERAL1_LARGE
-publishGenericEnvVariables: true
+publishGenericEnvVariables: true  # This is the default, but shown for clarity
+```
+
+#### Project-Specific Module (Legacy - Discouraged)
+
+The following is an example deployspec for a **project-specific module** (legacy approach, strongly discouraged):
+
+```yaml
+deploy:
+  phases:
+    install:
+      commands:
+        - npm install -g aws-cdk@2.20.0
+        - apt-get install jq
+        - pip install -r requirements.txt
+    build:
+      commands:
+        - aws iam create-service-linked-role --aws-service-name elasticmapreduce.amazonaws.com || true
+        - export ECR_REPO_NAME=$(echo $MYAPP_PARAMETER_FARGATE | jq -r '."ecr-repository-name"')
+        - aws ecr describe-repositories --repository-names ${ECR_REPO_NAME} || aws ecr create-repository --repository-name ${ECR_REPO_NAME}
+        - export IMAGE_NAME=$(echo $MYAPP_PARAMETER_FARGATE | jq -r '."image-name"')
+        - export COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+        - export IMAGE_TAG=${COMMIT_HASH:=latest}
+        - export REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPO_NAME
+        - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+        - >
+          echo "MYAPP_PARAMETER_SHARED_BUCKET_NAME: ${MYAPP_PARAMETER_SHARED_BUCKET_NAME}"
+        - echo Building the Docker image...          
+        - cd service/ && docker build -t $REPOSITORY_URI:latest .
+        - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+        - docker push $REPOSITORY_URI:latest && docker push $REPOSITORY_URI:$IMAGE_TAG
+        - cd.. && cdk deploy --all --require-approval never --outputs-file ./cdk-exports.json
+        - seedfarmer metadata convert
+destroy:
+  phases:
+    install:
+      commands:
+      - npm install -g aws-cdk@2.20.0
+      - pip install -r requirements.txt
+    build:
+      commands:
+      - cdk destroy --all --force --app "python app.py"
+build_type: BUILD_GENERAL1_LARGE
+publishGenericEnvVariables: false  # Explicitly set to false for project-specific modules
 ```
 
 ### Deployspec CLI Helper Commands
@@ -206,7 +212,7 @@ deploy:
     build:
       commands:
       # execute the CDK
-      - cdk deploy --require-approval never --progress events --app "python app.py" --outputs-file ./cdk-exports.json
+      - cdk deploy --require-approval never --outputs-file ./cdk-exports.json
       - seedfarmer metadata add -k TestKeyValue -v TestKeyValueValue || true
       - seedfarmer metadata add -j '{"JsonTest":"ValHere"}' || true
       - export DEPMOD=$(seedfarmer metadata depmod)
@@ -378,22 +384,22 @@ Create a new module manifest (see [Manifests](manifests.md)) and place it in the
 
 When developing modules for Seed-Farmer, consider the following best practices:
 
-1. **Use least-privilege permissions**: Define the minimum permissions required for your module in the `modulestack.yaml` file.
+1. **Create generic modules**: Always create generic modules (the default behavior) to ensure reusability across different projects. Avoid project-specific modules unless absolutely necessary for legacy compatibility.
 
-2. **Document your module**: Provide a comprehensive README.md that describes the module, its inputs, and its outputs.
+2. **Use least-privilege permissions**: Define the minimum permissions required for your module in the `modulestack.yaml` file.
 
-3. **Use generic environment variables**: If your module is intended to be reused across different projects, set `publishGenericEnvVariables: true` in the deployspec.
+3. **Document your module comprehensively**: Provide a detailed README.md that describes the module, its inputs, outputs, and includes sample output examples.
 
-4. **Provide sample outputs**: Include sample outputs in your README.md to help users understand what to expect.
+4. **Use consistent naming conventions**: Use kebab-case for parameter names (e.g., `vpc-id`, `instance-type`) and consistent naming for outputs to make modules easier to understand and use.
 
-5. **Use consistent naming conventions**: Use consistent naming conventions for parameters and outputs to make it easier for users to understand your module.
+5. **Handle errors gracefully**: Include error handling in your deployspec commands to ensure that failures are reported clearly and provide meaningful error messages.
 
-6. **Handle errors gracefully**: Include error handling in your deployspec commands to ensure that failures are reported clearly.
+6. **Test your module thoroughly**: Test your module in isolation before integrating it into a larger deployment. Verify both deployment and destruction work correctly.
 
-7. **Test your module**: Test your module in isolation before integrating it into a larger deployment.
+7. **Use the metadata CLI helper commands**: Leverage `seedfarmer metadata` commands to manage and export module outputs properly.
 
-8. **Use the metadata CLI helper commands**: Use the metadata CLI helper commands to manage and manipulate metadata in your module deployments.
+8. **Optimize for reusability**: Design your module to be reusable across different deployments and projects by avoiding hardcoded values and using parameters effectively.
 
-9. **Optimize for reusability**: Design your module to be reusable across different deployments and projects.
+9. **Export meaningful metadata**: Always export relevant outputs that other modules might need, using consistent naming conventions and including both simple values and complex objects as needed.
 
 10. **Follow the shared-responsibility model**: Be aware of and manage the relationships between your module and other modules to assess the impact of changes via redeployment.

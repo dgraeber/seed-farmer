@@ -141,7 +141,7 @@ deploy:
   phases:
     build:
       commands:
-        - cdk deploy --all --require-approval never --progress events --app "python app.py" --outputs-file ./cdk-exports.json
+        - cdk deploy --all --require-approval never --outputs-file ./cdk-exports.json
         - seedfarmer metadata convert
 ```
 

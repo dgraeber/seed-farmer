@@ -1,434 +1,427 @@
 # Manifests
 
-Seed-Farmer uses manifests to define deployments and modules. This page explains the format and structure of these manifests.
+Manifests are the foundation of Seed-Farmer deployments. They define **what** gets deployed, **where** it gets deployed, and **how** it gets configured. This page explains the purpose and structure of these manifests.
+
+## Overview
+
+Seed-Farmer uses two types of manifests to orchestrate deployments:
+
+- **Deployment Manifest**: The top-level configuration that defines the overall deployment strategy
+- **Module Manifest**: Individual module configurations that define specific components to deploy
+
+Think of the deployment manifest as the "blueprint" for your entire infrastructure deployment, while module manifests are the "building blocks" that make up that deployment.
 
 ## Deployment Manifest
 
-The deployment manifest is the top-level manifest that defines the deployment, including groups of modules and target account mappings.
+### What It Does
 
-### Structure
+The deployment manifest serves as the **master configuration** for your entire deployment. It answers these key questions:
+
+- **Where should things be deployed?** (Target accounts and regions)
+- **What groups of modules should be deployed together?** (Grouping and sequencing)
+- **How should the deployment be coordinated?** (Toolchain configuration, concurrency limits)
+- **What shared configuration applies across modules?** (Global parameters, network settings)
+
+### Key Responsibilities
+
+1. **Multi-Account Orchestration**: Defines which AWS accounts and regions to deploy to
+2. **Deployment Sequencing**: Controls the order in which groups of modules are deployed
+3. **Security Configuration**: Sets up IAM roles, permissions boundaries, and security policies
+4. **Shared Parameters**: Provides common configuration values that multiple modules can reference
+5. **Network Configuration**: Defines VPC settings for CodeBuild execution environments
+
+### Structure and Example
 
 ```yaml
-name: examples
-nameGenerator:
-  prefix: myprefix
-  suffix:
-    valueFrom:
-        envVariable: SUFFIX_ENV_VARIABLE
+name: my-infrastructure-deployment
 toolchainRegion: us-west-2
-forceDependencyRedeploy: False
-archiveSecret: example-archive-credentials-modules
+forceDependencyRedeploy: false
+
+# Define groups of modules - deployed sequentially
 groups:
-  - name: optionals
-    path: manifests-multi/examples/optional-modules.yaml
-    concurrency: 2
-  - name: optionals-2
-    path: manifests-multi/examples/optional-modules-2.yaml
+  - name: networking
+    path: manifests/networking-modules.yaml
+  - name: compute
+    path: manifests/compute-modules.yaml
+    concurrency: 4  # Optional: limit parallel execution to 4 modules
+  - name: applications
+    path: manifests/app-modules.yaml
+
+# Define target accounts and their configurations
 targetAccountMappings:
-  - alias: primary
+  - alias: production
     accountId:
       valueFrom:
-        envVariable: PRIMARY_ACCOUNT
+        envVariable: PROD_ACCOUNT_ID
     default: true
-    codebuildImage: XXXXXXXXXXXX.dkr.ecr.us-east-1.amazonaws.com/aws-codeseeder/code-build-base:5.5.0
-    runtimeOverrides:
-      python: "3.13"
-    npmMirror: https://registry.npmjs.org/
-    npmMirrorSecret: /something/aws-addf-mirror-credentials
-    pypiMirror: https://pypi.python.org/simple
-    pypiMirrorSecret: /something/aws-addf-mirror-mirror-credentials
-    rolePrefix: /
-    policyPrefix: /
     parametersGlobal:
-      dockerCredentialsSecret: nameofsecret
-      permissionsBoundaryName: policyname
+      permissionsBoundaryName: MyOrgBoundary
     regionMappings:
-      - region: us-east-2
+      - region: us-east-1
         default: true
-        codebuildImage: XXXXXXXXXXXX.dkr.ecr.us-east-1.amazonaws.com/aws-codeseeder/code-build-base:4.4.0
-        runtimeOverrides:
-          python: "3.13"
-        npmMirror: https://registry.npmjs.org/
-        npmMirrorSecret: /something/aws-addf-mirror-credentials
-        pypiMirror: https://pypi.python.org/simple
-        pypiMirrorSecret: /something/aws-addf-mirror-credentials
         parametersRegional:
-          dockerCredentialsSecret: nameofsecret
-          permissionsBoundaryName: policyname
-          vpcId: vpc-XXXXXXXXX
-          publicSubnetIds:
-            - subnet-XXXXXXXXX
-            - subnet-XXXXXXXXX
+          vpcId: vpc-12345678
           privateSubnetIds:
-            - subnet-XXXXXXXXX
-            - subnet-XXXXXXXXX
-          isolatedSubnetIds:
-            - subnet-XXXXXXXXX
-            - subnet-XXXXXXXXX
-          securityGroupsId:
-            - sg-XXXXXXXXX
-        network: 
-          vpcId:
-            valueFrom:
-              parameterValue: vpcId
-          privateSubnetIds:
-            valueFrom:
-              parameterValue: privateSubnetIds
-          securityGroupIds:
-            valueFrom:
-              parameterValue: securityGroupIds
-  - alias: secondary
-    accountId: 123456789012
-    regionMappings:
-      - region: us-west-2
-        parametersRegional:
-          dockerCredentialsSecret: nameofsecret
-          permissionsBoundaryName: policyname
-      - region: us-east-2
-        default: true
+            - subnet-abcd1234
+            - subnet-efgh5678
 ```
 
-### Fields
+### Critical Fields Explained
 
-#### Top-Level Fields
+#### Groups
+Groups define **deployment phases**. Modules within a group deploy in parallel, but groups deploy sequentially:
 
-- **name**: The name of your deployment. There can be only one deployment with this name in a project. Cannot be used with `nameGenerator`.
-- **nameGenerator**: Supports dynamically generating a deployment name by concatenation of prefix and suffix. Cannot be used with `name`.
-  - **prefix**: The prefix string of the name
-  - **suffix**: The suffix string of the name
-- **toolchainRegion**: The designated region that the toolchain is created in
-- **forceDependencyRedeploy**: A boolean that tells Seed-Farmer to redeploy ALL dependency modules. Default is `False`.
-- **archiveSecret**: Name of a secret in SecretsManager that contains the credentials to access a private HTTPS archive for the modules.
-- **groups**: The relative path to the module manifests that define each module in the group. This sequential order is preserved in deployment, and reversed in destroy.
-  - **name**: The name of the group
-  - **path**: The relative path to the module manifest
-  - **concurrency**: Limit the number of concurrent CodeBuild jobs that run. Default is the number of modules in the group.
+```yaml
+groups:
+  - name: foundation      # Deploys first (VPCs, IAM roles)
+    path: manifests/foundation.yaml
+  - name: data-layer      # Deploys second (databases, storage)
+    path: manifests/data.yaml  
+  - name: applications    # Deploys last (apps that depend on data layer)
+    path: manifests/apps.yaml
+```
 
 #### Target Account Mappings
-
-- **alias**: The logical name for an account, referenced by module manifests
-- **accountId**: The account ID tied to the alias. This parameter also supports environment variables.
-- **default**: Designates this mapping as the default account for all modules unless otherwise specified.
-- **codebuildImage**: A custom build image to use
-- **runtimeOverrides**: Runtime versions for the CodeBuild environment
-- **npmMirror**: The NPM registry mirror to use
-- **npmMirrorSecret**: The AWS SecretManager to use when setting the mirror
-- **pypiMirror**: The Pypi mirror to use
-- **pypiMirrorSecret**: The AWS SecretManager to use when setting the mirror
-- **rolePrefix**: IAM path prefix to use with Seed-Farmer roles
-- **policyPrefix**: IAM path prefix to use with Seed-Farmer policies
-- **parametersGlobal**: Parameters that apply to all region mappings unless otherwise overridden at the region level
-  - **dockerCredentialsSecret**: Secret containing Docker credentials
-  - **permissionsBoundaryName**: The name of the permissions boundary policy to apply to all module-specific roles created
-- **regionMappings**: Section to define region-specific configurations for the defined account
-  - **region**: The region name
-  - **default**: Designates this mapping as the default region for all modules unless otherwise specified.
-  - **codebuildImage**: A custom build image to use
-  - **runtimeOverrides**: Runtime versions for the CodeBuild environment
-  - **npmMirror**: The NPM registry mirror to use
-  - **npmMirrorSecret**: The AWS SecretManager to use when setting the mirror
-  - **pypiMirror**: The Pypi mirror to use
-  - **pypiMirrorSecret**: The AWS SecretManager to use when setting the mirror
-  - **rolePrefix**: IAM path prefix to use with Seed-Farmer roles
-  - **policyPrefix**: IAM path prefix to use with Seed-Farmer policies
-  - **parametersRegional**: Parameters that apply to all region mappings unless otherwise overridden at the region level
-    - **dockerCredentialsSecret**: Secret containing Docker credentials
-    - **permissionsBoundaryName**: The name of the permissions boundary policy to apply to all module-specific roles created
-    - Any other parameter in this list is NOT a named parameter and is solely for the use of lookup in module manifests or the network object
-  - **network**: This section indicates to Seed-Farmer and AWS CodeSeeder that the CodeBuild Project should be run in a VPC on Private Subnets.
-    - **vpcId**: The VPC ID the CodeBuild Project should be associated to
-    - **privateSubnetIds**: The private subnets the CodeBuild Project should be associated to
-    - **securityGroupIds**: The Security Groups the CodeBuild Project should be associated to (limit of 5)
-
-### Network Configuration for Regions
-
-The network configuration for regions can be defined using:
-
-- Hardcoded values
-- Regional parameters
-- AWS SSM parameters
-- Environment variables
-
-#### Hardcoded Value Support for Network
+This section defines **where** your modules will be deployed:
 
 ```yaml
-network: 
-  vpcId: vpc-XXXXXXXXX    
-  privateSubnetIds:
-    - subnet-XXXXXXXXX
-    - subnet-XXXXXXXXX
-  securityGroupsIds:
-    - sg-XXXXXXXXX
+targetAccountMappings:
+  - alias: dev           # Logical name used in module manifests
+    accountId: 111111111111
+    regionMappings:
+      - region: us-east-1
+        parametersRegional:
+          environment: development
+  - alias: prod
+    accountId: 222222222222  
+    regionMappings:
+      - region: us-east-1
+      - region: us-west-2    # Multi-region deployment
 ```
 
-#### Regional Parameters Support for Network
+## Module Manifest
+
+### What It Does
+
+Module manifests define **individual deployable components**. Each module manifest answers:
+
+- **What specific infrastructure should be created?** (The module's purpose)
+- **Where should this module be deployed?** (Target account/region)
+- **What configuration does this module need?** (Parameters and dependencies)
+- **How should this module access other resources?** (Dependencies on other modules)
+
+### Key Responsibilities
+
+1. **Component Definition**: Specifies what infrastructure component to deploy
+2. **Location Targeting**: Defines which account and region to deploy to
+3. **Parameter Configuration**: Provides module-specific configuration values
+4. **Dependency Management**: References outputs from other modules
+5. **Source Management**: Defines where the module code is located (local, Git, archive)
+
+### Structure and Example
 
 ```yaml
-network: 
-  vpcId:
-    valueFrom:
-      parameterValue: vpcId
-  privateSubnetIds:
-    valueFrom:
-      parameterValue: privateSubnetIds
-  securityGroupIds:
-    valueFrom:
-      parameterValue: securityGroupIds
+# Module in networking group - creates VPC foundation
+name: vpc-network
+path: modules/networking/vpc/
+targetAccount: production
+targetRegion: us-east-1
+parameters:
+  - name: cidr-block
+    value: "10.0.0.0/16"
+  - name: enable-dns-hostnames
+    value: true
+---
+# Another module in the same networking group - creates subnets
+# Note: Modules in the same group deploy in parallel and cannot reference each other
+name: security-groups
+path: modules/networking/security/
+targetAccount: production
+targetRegion: us-east-1
+parameters:
+  - name: vpc-cidr
+    value: "10.0.0.0/16"
+  - name: allow-ssh
+    value: true
 ```
 
-#### AWS SSM Parameters Support for Network
+### Critical Fields Explained
+
+#### Module Dependencies
+Modules can reference outputs from other modules using `moduleMetadata`:
 
 ```yaml
-network: 
-  vpcId: 
+parameters:
+  - name: database-endpoint
     valueFrom:
-      parameterStore: /idf/testing/vpcid
-  privateSubnetIds:
-    valueFrom:
-      parameterStore: /idf/testing/privatesubnets
-  securityGroupIds:
-    valueFrom:
-      parameterStore: /idf/testing/securitygroups
+      moduleMetadata:
+        group: data-layer        # Group containing the database module
+        name: postgres-db        # Name of the database module
+        key: DatabaseEndpoint    # Specific output from that module
 ```
 
-#### Environment Variable Support for Network
+#### Parameter Sources
+Modules can get configuration from multiple sources:
 
 ```yaml
-network: 
-  vpcId: 
+parameters:
+  # Static value
+  - name: instance-type
+    value: t3.large
+    
+  # From environment variable
+  - name: key-pair-name
     valueFrom:
-      envVariable: VPCID
-  privateSubnetIds:
+      envVariable: EC2_KEY_PAIR
+      
+  # From AWS SSM Parameter Store
+  - name: ami-id
     valueFrom:
-      envVariable: PRIVATESUBNETS
-  securityGroupIds:
+      parameterStore: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+      
+  # From AWS Secrets Manager
+  - name: database-password
     valueFrom:
-      envVariable: SECURITYGROUPS
+      secretsManager: prod/database/password
+```
+
+## How Manifests Work Together
+
+### Deployment Flow
+
+1. **Deployment Manifest Processing**: Seed-Farmer reads the deployment manifest to understand the overall deployment strategy
+2. **Account Setup**: Sets up toolchain and deployment roles in target accounts
+3. **Group Processing**: Processes each group sequentially
+4. **Module Processing**: Within each group, processes module manifests in parallel
+5. **Parameter Resolution**: Resolves all parameter sources (environment variables, SSM, module dependencies)
+6. **Module Deployment**: Executes each module's deployspec in AWS CodeBuild
+
+### Parameter Flow Example
+
+```mermaid
+graph TD
+    A[Deployment Manifest] --> B[Global Parameters]
+    A --> C[Regional Parameters]
+    D[Module Manifest] --> E[Module Parameters]
+    B --> F[CodeBuild Environment]
+    C --> F
+    E --> F
+    G[Other Module Outputs] --> F
+    F --> H[Module Deployspec Execution]
+```
+
+## Parameters and Environment Variables
+
+### Parameter Processing
+
+When Seed-Farmer processes parameters, it converts them into environment variables that are available in the CodeBuild environment where your module's deployspec runs.
+
+### Environment Variable Naming Convention
+
+**This is critically important**: Seed-Farmer transforms parameter names into environment variables using a specific naming convention.
+
+#### Generic Modules (Default)
+Parameters use the `SEEDFARMER_PARAMETER_` prefix:
+
+```yaml
+# In your module manifest
+parameters:
+  - name: vpc-id
+    value: vpc-12345678
+  - name: instanceType  
+    value: t3.medium
+  - name: some_database_name
+    value: myapp-db
+```
+
+These become:
+```bash
+SEEDFARMER_PARAMETER_VPC_ID=vpc-12345678
+SEEDFARMER_PARAMETER_INSTANCE_TYPE=t3.medium
+SEEDFARMER_PARAMETER_SOME_DATABASE_NAME=myapp-db
+```
+
+#### Project-Specific Modules
+Project-specific modules are a legacy feature that is now **strongly discouraged**. It is recommended to always create generic modules to avoid dependency on project naming. This feature is maintained for backward compatibility only.
+
+When `publishGenericEnvVariables: false` is set in the deployspec, parameters are prefixed with your project name using `<PROJECT_NAME>_PARAMETER_<PARAMETER_KEY>` format:
+
+```bash
+MYAPP_PARAMETER_VPC_ID=vpc-12345678
+MYAPP_PARAMETER_INSTANCE_TYPE=t3.medium
+MYAPP_PARAMETER_SOME_DATABASE_NAME=myapp-db
+```
+
+#### Naming Transformation Rules
+
+Parameter names are transformed using these rules:
+
+| Original Parameter Name | Environment Variable (Generic) |
+|------------------------|--------------------------------|
+| `vpc-id`               | `SEEDFARMER_PARAMETER_VPC_ID`  |
+| `vpcId`                | `SEEDFARMER_PARAMETER_VPC_ID`  |
+| `VpcId`                | `SEEDFARMER_PARAMETER_VPC_ID`  |
+| `vpc_id`               | `SEEDFARMER_PARAMETER_VPC_ID`  |
+| `instanceType`         | `SEEDFARMER_PARAMETER_INSTANCE_TYPE` |
+| `some-complex-name`    | `SEEDFARMER_PARAMETER_SOME_COMPLEX_NAME` |
+
+### Using Parameters in Your Deployspec
+
+In your module's `deployspec.yaml`, you can reference these environment variables:
+
+```yaml
+# deployspec.yaml
+deploy:
+  phases:
+    build:
+      commands:
+        # Reference the VPC ID parameter
+        - echo "Deploying to VPC: $SEEDFARMER_PARAMETER_VPC_ID"
+        # Use in CDK deployment
+        - cdk deploy --parameters VpcId=$SEEDFARMER_PARAMETER_VPC_ID
+        # Use in CloudFormation
+        - aws cloudformation deploy --parameter-overrides VpcId=$SEEDFARMER_PARAMETER_VPC_ID
+```
+
+### System Environment Variables
+
+Seed-Farmer also provides system-level environment variables:
+
+#### Generic Modules (Default)
+```bash
+SEEDFARMER_PROJECT_NAME=myapp
+SEEDFARMER_DEPLOYMENT_NAME=production  
+SEEDFARMER_MODULE_NAME=vpc-network
+SEEDFARMER_GROUP_NAME=networking
+```
+
+## Advanced Configuration
+
+### Network Configuration for CodeBuild
+
+You can configure CodeBuild to run in a VPC for modules that need access to private resources:
+
+```yaml
+# In deployment manifest
+regionMappings:
+  - region: us-east-1
+    network:
+      vpcId: vpc-12345678
+      privateSubnetIds:
+        - subnet-abcd1234
+        - subnet-efgh5678
+      securityGroupIds:
+        - sg-ijkl9012
 ```
 
 ### Dependency Management
 
-Seed-Farmer has a shared-responsibility model for dependency management of modules. It includes guardrails to:
+Seed-Farmer automatically manages dependencies between modules:
 
-- Prevent deletion of modules that have downstream modules dependent on them
-- Prevent circular references of modules
+- **Prevents circular dependencies**: Validates that modules don't depend on each other in a loop
+- **Enforces deployment order**: Ensures dependencies are deployed before dependent modules
+- **Prevents premature deletion**: Blocks deletion of modules that other modules depend on
 
-However, it is up to the end user to be aware of and manage the relationships between modules to assess the impact of changes to modules via redeployment.
+### Force Dependency Redeploy
 
-#### Force Dependency Redeploy
-
-When a module changes (is redeployed), downstream modules that are dependent on it may need to consume those changes. The `forceDependencyRedeploy` flag in the deployment manifest tells Seed-Farmer to force a redeploy of all modules impacted by the redeploy of another module.
-
-!!! warning
-    This is an indiscriminate feature that is not granular enough to detect what is causing a redeploy, only that one needs to occur. Any change to a module will trigger a redeploy of that module and all downstream modules that depend on it, even if the underlying logic or artifact has not changed.
-
-## Module Manifest
-
-The module manifest is referred to by the deployment manifest and defines the information the CLI needs to deploy a module or a group of modules - as defined by the group. Each entry in the module manifest is deployed in parallel and ordering is not preserved.
-
-### Structure
+Use the `forceDependencyRedeploy` flag to automatically redeploy dependent modules when their dependencies change:
 
 ```yaml
-name: networking
-path: modules/optionals/networking/
-targetAccount: primary
+# In deployment manifest
+forceDependencyRedeploy: true
+```
+
+!!! warning "Use with Caution"
+    This flag causes ALL dependent modules to redeploy when ANY dependency changes, even if the change doesn't affect them. This can lead to unnecessary redeployments and potential service disruptions.
+
+## Best Practices
+
+### Deployment Manifest Best Practices
+
+1. **Use meaningful group names** that reflect deployment phases (foundation, data, applications)
+2. **Only set concurrency limits when necessary** - modules in a group run in parallel by default; use concurrency only to restrict parallelism when you have resource constraints or need to limit simultaneous deployments
+3. **Use environment variables** for account IDs and sensitive values
+4. **Define global parameters** for values used across multiple modules
+5. **Configure permissions boundaries** for enhanced security
+
+### Module Manifest Best Practices
+
+1. **Use descriptive module names** that clearly indicate the module's purpose
+2. **Leverage module dependencies** instead of hardcoding resource references
+3. **Use parameter sources appropriately**:
+   - Static values for configuration that rarely changes
+   - Environment variables for deployment-specific values
+   - SSM parameters for shared configuration
+   - Secrets Manager for sensitive data
+   - Module metadata for resource dependencies
+4. **Document parameter requirements** in your module's README
+5. **Use consistent naming conventions** for parameters across related modules
+
+### Parameter Best Practices
+
+1. **Use kebab-case for parameter names** (e.g., `vpc-id`, `instance-type`)
+2. **Choose descriptive parameter names** that clearly indicate their purpose
+3. **Group related parameters** logically in your module manifests
+4. **Validate parameter values** in your deployspec when possible
+5. **Document parameter formats** and expected values in module documentation
+
+## Common Patterns
+
+### Multi-Environment Deployment
+
+```yaml
+# deployment-dev.yaml
+name: myapp-development
+targetAccountMappings:
+  - alias: dev
+    accountId:
+      valueFrom:
+        envVariable: DEV_ACCOUNT_ID
+
+# deployment-prod.yaml  
+name: myapp-production
+targetAccountMappings:
+  - alias: prod
+    accountId:
+      valueFrom:
+        envVariable: PROD_ACCOUNT_ID
+```
+
+### Cross-Region Deployment
+
+```yaml
+targetAccountMappings:
+  - alias: primary
+    accountId: 123456789012
+    regionMappings:
+      - region: us-east-1
+        default: true
+      - region: us-west-2
+        parametersRegional:
+          backup-region: true
+```
+
+### Module Dependency Chain
+
+```yaml
+# Database module (no dependencies)
+name: postgres-database
+path: modules/database/postgres/
 parameters:
-  - name: internet-accessible
-    value: true
+  - name: instance-class
+    value: db.t3.medium
+
 ---
-name: buckets
-path: modules/optionals/buckets
-targetAccount: secondary
-targetRegion: us-west-2
-codebuildImage: XXXXXXXXXXXX.dkr.ecr.us-east-1.amazonaws.com/aws-codeseeder/code-build-base:3.3.0
-runtimeOverrides:
-  python: "3.13"
-npmMirror: https://registry.npmjs.org/
-npmMirrorSecret: /something/aws-addf-mirror-credentials
-pypiMirror: https://pypi.python.org/simple
-pypiMirrorSecret: /something/aws-addf-mirror-credentials
+# Application module (depends on database)
+name: web-application  
+path: modules/app/webapp/
 parameters:
-  - name: encryption-type
-    value: SSE
-  - name: some-name
+  - name: database-endpoint
     valueFrom:
       moduleMetadata:
-        group: optionals
-        name: networking
-        key: VpcId
-dataFiles:
-  - filePath: data/test2.txt
-  - filePath: test1.txt
-  - filePath: git::https://github.com/awslabs/idf-modules.git//modules/storage/buckets/deployspec.yaml?ref=release/1.0.0&depth=1
-  - filePath: archive::https://github.com/awslabs/idf-modules/archive/refs/tags/v1.6.0.tar.gz?module=modules/storage/buckets/deployspec.yaml
+        group: data
+        name: postgres-database
+        key: DatabaseEndpoint
 ```
 
-### Fields
-
-- **name**: The name of the module. This name must be unique in the group of the deployment.
-- **path**: The relative path to the module code in the project, or a Git repository URL, or a release archive URL.
-- **targetAccount**: The alias of the account from the deployment manifest mappings.
-- **targetRegion**: The name of the region to deploy to - this overrides any mappings.
-- **codebuildImage**: A custom build image to use.
-- **runtimeOverrides**: Runtime versions for the CodeBuild environment.
-- **npmMirror**: The NPM registry mirror to use.
-- **npmMirrorSecret**: The AWS SecretManager to use when setting the mirror.
-- **pypiMirror**: The Pypi mirror to use.
-- **pypiMirrorSecret**: The AWS SecretManager to use when setting the mirror.
-- **parameters**: The parameters to pass to the module.
-- **dataFiles**: Additional files to add to the bundle that are outside of the module code.
-
-### Git Repository References
-
-You can reference a module from a Git repository using the Terraform semantic:
-
-```yaml
-name: networking
-path: git::https://github.com/awslabs/idf-modules.git//modules/network/basic-cdk?ref=release/1.0.0&depth=1
-targetAccount: secondary
-parameters:
-  - name: internet-accessible
-    value: true
-```
-
-### Archive References
-
-You can reference a module from an archive over HTTPS:
-
-```yaml
-name: networking
-path: archive::https://github.com/awslabs/idf-modules/archive/refs/tags/v1.6.0.tar.gz?module=modules/network/basic-cdk
-targetAccount: secondary
-parameters:
-  - name: internet-accessible
-    value: true
-```
-
-### Data Files
-
-The `dataFile` support for modules is intended to take files located outside of the module code and package them as if they were a part of the module. This is useful for data files that are shared amongst multiple modules or are dynamic and can change over time.
-
-!!! warning
-    If you deploy with data files sourced from a local filesystem, you MUST provide those same files in order to update the module(s) at a later time. Seed-Farmer persists the bundled code with data files, but for destroy ONLY.
-
-## Parameters
-
-Parameters are defined in the module manifests as key/value pairs. On deployment, values are serialized to JSON and passed to the module's CodeBuild execution as environment variables.
-
-### Types of Parameters
-
-#### User-Defined
-
-Simple key/value pairs passed in as strings:
-
-```yaml
-parameters:
-  - name: glue-db-suffix
-    value: vsidata
-  - name: rosbag-bagfile-table-suffix
-    value: Rosbag-BagFile-Metadata
-```
-
-#### Environment Variables
-
-Values from environment variables:
-
-```yaml
-parameters:
-  - name: vpc-id
-    valueFrom:
-      envVariable: ENV_VPC_ID
-```
-
-#### Module Metadata
-
-Values from other modules:
-
-```yaml
-parameters:
-  - name: vpc-id
-    valueFrom:
-      moduleMetadata:
-        group: optionals
-        name: networking
-        key: VpcId
-```
-
-#### Global and Regional Parameters
-
-Values from global or regional parameters defined in the deployment manifest:
-
-```yaml
-parameters:
-  - name: vpc-id
-    valueFrom:
-      parameterValue: vpcId
-```
-
-#### AWS SSM Parameter
-
-Values from AWS SSM Parameter Store:
-
-```yaml
-parameters:
-  - name: vpc-id
-    valueFrom:
-      parameterStore: my-vpc-id
-```
-
-#### AWS Secrets Manager
-
-Values from AWS Secrets Manager:
-
-```yaml
-parameters:
-  - name: vpc-id
-    valueFrom:
-      secretsManager: my-secret-vpc-id
-```
-
-### Parameters in AWS CodeSeeder
-
-CodeBuild environment variables that are set via AWS CodeSeeder are made known to the module using a naming convention based off the parameter's key. Parameter keys are converted from "PascalCase", "camelCase", or "kebab-case" to all upper "SNAKE_CASE" and prefixed with "<<project>>_PARAMETER_".
-
-For example, if the name of your project is "MY_APP":
-
-```
-* someKey will become environment variable MYAPP_PARAMETER_SOME_KEY
-* SomeKey will become environment variable MYAPP_PARAMETER_SOME_KEY
-* some-key will become environment variable MYAPP_PARAMETER_SOME_KEY
-* some_key will become environment variable MYAPP_PARAMETER_SOME_KEY
-* somekey will become environment variable MYAPP_PARAMETER_SOMEKEY
-```
-
-## Universal Environment Variable Replacement in Manifests
-
-As of Seed-Farmer version 3.5.0, there is support for dynamic replacement of values with environment variables in manifests. Any string within your manifests that has a designated pattern will automatically be resolved. If you have an environment variable named `SOMEKEY` that is defined, you can reference it in your manifests via wrapping it in `${}` --> for example `${SOMEKEY}`.
-
-Additionally, it is possible to disable environment variable replacement in module input parameters using `disableEnvVarResolution: True` for cases such as when input parameter is a script.
-
-Example:
-
-```yaml
-name: dummy
-path: git::https://github.com/awslabs/idf-modules.git//modules/dummy/blank?ref=release/1.2.0
-targetAccount: primary
-targetRegion: us-east-1
-parameters:
-  - name: test
-    value: hiyooo
-  - name: myparamkey
-    valueFrom:
-      parameterStore: /idf/${SOMEKEY}/somekey
-  - name: test2
-    value: ${SOMEKEY}
-  - name: param-no-env-resolution
-    disableEnvVarResolution: True
-    value:
-      - |
-        export VAR=test
-        echo "${VAR}"
-```
-
-!!! warning
-    We do not recommend using this in the `name` field of manifests as any value that is referenced by downstream manifests MUST align.
+This structure ensures that the database is created before the application that depends on it, and the application automatically receives the correct database endpoint.
