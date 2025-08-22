@@ -17,7 +17,7 @@ The [Local Deployments](local-deployments.md) guide explains how to deploy Seed-
 
 ## Remote Deployments
 
-The [Remote Deployments](remote-deployments.md) guide covers deploying Seed-Farmer projects using AWS CodeBuild in the cloud. It explains how AWS CodeSeeder orchestrates remote deployments, working with different CodeBuild images, image overrides, and the deployment process in AWS environments.
+The [Remote Deployments](remote-deployments.md) guide covers deploying Seed-Farmer projects using AWS CodeBuild in the cloud. It explains how Seed-Farmer leverages the Seedkit for remote deployments, working with different CodeBuild images, image overrides, and the deployment process in AWS environments.
 
 
 

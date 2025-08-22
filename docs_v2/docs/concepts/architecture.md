@@ -255,14 +255,16 @@ seedfarmer seedkit destroy myproject --region us-east-1
 ### Seedkit Naming Convention
 
 The seedkit follows a consistent naming pattern:
-- **Stack Name**: `aws-codeseeder-<project-name>`
-- **Resources**: Prefixed with project name for identification
-- **S3 Bucket**: `seedfarmer-<project>-<account>-<region>-<hash>`
+
+  - **Stack Name**: `aws-codeseeder-<project-name>`
+  - **Resources**: Prefixed with `codeseeder-<project>` name for identification
+  - **S3 Bucket**: `codeseeder-<project>-<account>-<hash>`
 
 Example for a project named "data-platform":
-- Stack: `aws-codeseeder-data-platform`
-- CodeBuild Project: `data-platform-seedfarmer`
-- S3 Bucket: `seedfarmer-data-platform-123456789012-us-east-1-abc123`
+
+  - Stack: `aws-codeseeder-data-platform`
+  - CodeBuild Project: `codeseeder-data-platform`
+  - S3 Bucket: `codeseeder-data-platform-123456789012-abc123`
 
 ### Seedkit Configuration
 
@@ -369,12 +371,36 @@ seedfarmer list deployments
 aws cloudformation describe-stacks --stack-name aws-codeseeder-myproject
 
 # View CodeBuild project details
-aws codebuild batch-get-projects --names myproject-seedfarmer
+aws codebuild batch-get-projects --names codeseeder-myproject
 ```
 
 The seedkit is essential for Seed-Farmer operations, providing the secure, scalable infrastructure needed for module deployments across multiple AWS accounts and regions.
 
+## Seed-Farmer Artifacts
 
+
+For each account / region, Seed-Farmer will also deploy an S3 Bucket to store the bundled code used for each successfully deployed module.  This bundle is the exact code used to deploy and is to support the deletion of the module.  Once the module is destroyed, the bundled code is deleted. 
+
+### What are the Seed-Farmer Artifacts 
+The Seed-Farmer artifacts are comprised of a Cloudformation stack that contains the definition of the S3 bucket and an S3 bucket policy.
+
+### Seed-Farmer Artifacts Naming Convention
+
+The artifacts follow a consistent naming pattern:
+
+  - **Stack Name**: `seedfarmer-<project-name>-artifacts`
+  - **S3 Bucket**: `seedfarmer-<project>-<region>-<account>-<hash>-no-delete`
+  - **S3 Bucket Policy**: `seedfarmer-<project>-<region>-<account>-<hash>-no-delete`
+ 
+
+Example for a project named "data-platform":
+
+  - Stack: `seedfarmer-data-platform-artifacts`
+  - S3 Bucket: `seedfarmer-data-platform-us-east-1-123456789012-abc123-no-delete`
+  - S3 Bucket Policy: `seedfarmer-data-platform-us-east-1-123456789012-abc123-no-delete`
+
+Seed-Farmer will deploy this stack in each account / region that is configured.
+Seed-Farmer will delete this stack if determined that there are no more deployments using it. 
 
 ## State Management
 
@@ -404,4 +430,4 @@ When a module changes (is redeployed), downstream modules that are dependent on 
 
 ## Conclusion
 
-The Seed-Farmer architecture provides a secure, flexible, and scalable way to deploy infrastructure across multiple AWS accounts and regions. By leveraging AWS CodeSeeder and AWS CodeBuild, it ensures that deployments are repeatable, auditable, and follow the principle of least privilege.
+The Seed-Farmer architecture provides a secure, flexible, and scalable way to deploy infrastructure across multiple AWS accounts and regions. By leveraging AWS CodeBuild, it ensures that deployments are repeatable, auditable, and follow the principle of least privilege.

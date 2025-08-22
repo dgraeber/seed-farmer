@@ -182,9 +182,9 @@ This module creates an OpenSearch cluster
 
 ## ModuleStack
 
-The modulestack (`modulestack.yaml`) is an optional AWS CloudFormation file that contains the granular permissions that AWS CodeSeeder will need to deploy your module. It is recommended to use a least-privilege policy to promote security best practices.
+The modulestack (`modulestack.yaml`) is an optional AWS CloudFormation file that contains the granular permissions that the module role may need to deploy your module. It is recommended to use a least-privilege policy to promote security best practices.
 
-By default, the CLI uses AWS CDK v2, which assumes a role that has the permissions to deploy via CloudFormation and is the recommended practice. You have the ability to use the `modulestack.yaml` to give additional permissions to `AWS CodeSeeder` on your behalf.
+By default, the CLI uses AWS CDK v2, which assumes a role that has the permissions to deploy via CloudFormation and is the recommended practice. You have the ability to use the `modulestack.yaml` to give additional permissions to the module role on your behalf.
 
 Typical cases when you would use a `modulestack.yaml`:
 

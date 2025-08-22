@@ -258,7 +258,7 @@ seedfarmer bootstrap toolchain \
 
 ### How do I define module-specific permissions?
 
-You can define module-specific permissions using the `modulestack.yaml` file. This file contains the granular permissions that AWS CodeSeeder will need to deploy your module.
+You can define module-specific permissions using the `modulestack.yaml` file. This file contains the granular permissions that the module role may need to deploy your module.
 
 ## Troubleshooting
 
