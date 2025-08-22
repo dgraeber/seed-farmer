@@ -4,7 +4,7 @@ This guide explains how to deploy Seed-Farmer projects locally using Docker for 
 
 ## What are Local Deployments?
 
-Local deployments execute your module's deployspec using Docker containers on your local machine instead of AWS CodeBuild. This approach:
+Local deployments execute your module code via the deployspec using Docker containers on your local machine instead of AWS CodeBuild. This approach:
 
 - **Speeds up development**: No need to wait for CodeBuild project startup
 - **Reduces costs**: No CodeBuild charges during development
@@ -47,9 +47,12 @@ docker --version
 docker info
 ```
 
-**Supported Docker Images**:
+**Docker Images**:
 
-- `public.ecr.aws/codebuild/amazonlinux2-x86_64-standard:5.0` 
+These images are required for using Local Deployments:
+
+- `public.ecr.aws/codebuild/local-builds:latest` - used for management of the deployment execution
+- `public.ecr.aws/codebuild/amazonlinux2-x86_64-standard:5.0`- the codebuild image used for deployment
 
 !!! note "Image Support"
     Currently, local deployments only support the Amazon Linux 2 x86_64 standard image. Support for additional CodeBuild images will be added in future releases. The image used is driven by your deployment and module manifest configuration.
