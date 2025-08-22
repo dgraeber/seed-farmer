@@ -23,18 +23,25 @@ graph TB
     TR --> SSM[AWS Systems Manager]
     TR --> DR1[Deployment Role - Account A]
     TR --> DR2[Deployment Role - Account B]
-    
+
     DR1 --> CB1[CodeBuild - Account A]
     DR2 --> CB2[CodeBuild - Account B]
-    
+
     CB1 --> MR1[Module Role A]
     CB2 --> MR2[Module Role B]
-    
+
     MR1 --> AWS1[AWS Services - Account A]
     MR2 --> AWS2[AWS Services - Account B]
-    
+
     CB1 --> S3_1[S3 Bucket - Account A]
     CB2 --> S3_2[S3 Bucket - Account B]
+
+    %% Global style: Same fill, stroke, text color
+    classDef uniform fill:#448bae,stroke:#33cf3e,stroke-width:2px,color:#063d59;
+
+    %% Apply the style to all nodes
+    class User,CLI,TR,SSM,DR1,DR2,CB1,CB2,MR1,MR2,AWS1,AWS2,S3_1,S3_2 uniform;
+
 ```
 
 ## Security Model
