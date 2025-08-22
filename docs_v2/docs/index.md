@@ -45,4 +45,4 @@ This documentation is organized into the following sections:
 - **Guides**: How-to guides for common tasks
 - **Reference**: Detailed reference documentation for CLI commands, manifests, and module development
 - **Public Modules**: Listing of Seed-Farmer compliant OpenSource modules ready for use
-- **AI Support**: Artificial Intelligence support for SeedFarmer module development
+- **AI Support**: Artificial Intelligence support for Seed-Farmer module development
