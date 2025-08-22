@@ -402,7 +402,7 @@ The seedkit is essential for Seed-Farmer operations, providing the secure, scala
 
 For each account / region, Seed-Farmer will also deploy an S3 Bucket to store the bundled code used for each successfully deployed module.  This bundle is the exact code used to deploy and is to support the deletion of the module.  Once the module is destroyed, the bundled code is deleted. 
 
-### What are the Seed-Farmer Artifacts 
+### What are Seed-Farmer Artifacts?
 The Seed-Farmer artifacts are comprised of a Cloudformation stack that contains the definition of the S3 bucket and an S3 bucket policy.
 
 ### Seed-Farmer Artifacts Naming Convention
