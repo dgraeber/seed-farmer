@@ -108,6 +108,8 @@ nav:
     - Overview: modules/index.md
     - IDF Modules: modules/idf-modules/index.md
     - AIOps Modules: modules/aiops-modules/index.md
+  - AI Support:
+    - Overview: ai/index.md
     
 extra:
   social:
