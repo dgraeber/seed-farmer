@@ -37,7 +37,7 @@ graph TB
     CB2 --> S3_2[S3 Bucket - Account B]
 
     %% Global style: Same fill, stroke, text color
-    classDef uniform fill:#448bae,stroke:#33cf3e,stroke-width:2px,color:#063d59;
+    classDef uniform fill:#448bae,stroke:#d8a932,stroke-width:3px,color:#063d59;
 
     %% Apply the style to all nodes
     class User,CLI,TR,SSM,DR1,DR2,CB1,CB2,MR1,MR2,AWS1,AWS2,S3_1,S3_2 uniform;
@@ -85,7 +85,7 @@ graph LR
         TR[Toolchain Role]
         SSM[Systems Manager]
     end
-    
+
     subgraph "Target Account A"
         DR1[Deployment Role]
         MR1[Module Role 1]
@@ -93,19 +93,26 @@ graph LR
         CB1[CodeBuild]
         S3_1[S3 Bucket]
     end
-    
+
     subgraph "Target Account B"
         DR2[Deployment Role]
         MR3[Module Role 3]
         CB2[CodeBuild]
         S3_2[S3 Bucket]
     end
-    
+
     TR -.->|Assume| DR1
     TR -.->|Assume| DR2
     DR1 -.->|Create| MR1
     DR1 -.->|Create| MR2
     DR2 -.->|Create| MR3
+
+    %% Global style: Same fill, stroke, text color
+    classDef uniform fill:#448bae,stroke:#d8a932,stroke-width:3px,color:#063d59;
+
+    %% Apply the style to all nodes (including all inside subgraphs)
+    class TR,SSM,DR1,MR1,MR2,CB1,S3_1,DR2,MR3,CB2,S3_2 uniform;
+
 ```
 
 ## Multi-Account Architecture
@@ -153,19 +160,26 @@ Seed-Farmer optimizes deployment performance through multiple levels of parallel
 
 ```mermaid
 graph TD
-    SF[Deployment] 
-    
+    SF[Deployment]
+
     SF -->|"1. Deploy First"| G1["Group 1<br/>(Networking)"]
     SF -->|"2. Deploy Second"| G2["Group 2<br/>(Compute)"]
     SF -->|"3. Deploy Third"| G3["Group 3<br/>(Applications)"]
-    
+
     G1 --> M1[VPC Module]
     G1 --> M3[Load Balancer]
-    
+
     G2 --> M4[EKS Cluster]
     G2 --> M5[RDS Database]
-    
+
     G3 --> M6[Web Application]
+
+    %% Global style: Same fill, stroke, text color
+    classDef uniform fill:#448bae,stroke:#d8a932,stroke-width:3px,color:#063d59;
+
+    %% Apply the style to all nodes
+    class SF,G1,G2,G3,M1,M3,M4,M5,M6 uniform;
+
 ```
 
 **Execution Flow:**
