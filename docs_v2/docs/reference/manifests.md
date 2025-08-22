@@ -203,11 +203,17 @@ graph TD
     A[Deployment Manifest] --> B[Global Parameters]
     A --> C[Regional Parameters]
     D[Module Manifest] --> E[Module Parameters]
-    B --> F[CodeBuild Environment]
-    C --> F
-    E --> F
+    B --> D
+    C --> D
+    E --> F[CodeBuild Environment]
     G[Other Module Outputs] --> F
     F --> H[Module Deployspec Execution]
+
+    %% Global style: Same fill, stroke, text color
+    classDef uniform fill:#448bae,stroke:#d8a932,stroke-width:3px,color:#063d59;
+
+    %% Apply the style to all nodes
+    class A,B,C,D,E,F,G,H uniform;
 ```
 
 ## Parameters and Environment Variables
