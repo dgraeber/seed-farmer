@@ -7,7 +7,7 @@
 install:  ## Install dependencies
 	curl -Ls https://astral.sh/uv/install.sh | sh
 	@echo "Setting up virtual environment..."
-	uv venv -p3.11 .venv
+	uv venv -p3.12 .venv
 	@echo "Installing Dev dependencies..."
 	. .venv/bin/activate && \
 	uv sync --frozen
@@ -57,3 +57,23 @@ clean:  ## Remove build artifacts and virtual environment
 	rm -rf .mypy_cache/
 	rm -rf .ruff_cache/
 	find . -type d -name __pycache__ -exec rm -rf {} +
+
+.PHONY: docs-install
+docs-install:  ## Install dependencies
+	curl -Ls https://astral.sh/uv/install.sh | sh
+	@echo "Setting up virtual environment for docs at .venv-docs..."
+	uv venv -p3.12 .venv --clear
+	@echo "Installing Dev dependencies..."
+	. .venv/bin/activate && \
+	uv sync --group docs
+
+.PHONY: docs-build
+docs-build: 
+	mkdocs build
+
+.PHONY: docs-serve
+docs-serve:
+	mkdocs serve -a localhost:9000
+
+
+
