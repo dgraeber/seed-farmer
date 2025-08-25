@@ -48,13 +48,19 @@ project-root/
 
 ### Project Configuration File
 
-Every Seed-Farmer project must have a `seedfarmer.yaml` file at the root:
+Every Seed-Farmer project must have a `seedfarmer.yaml` file at the root and must the the project name defined:
 
 ```yaml
 project: my-data-platform
+
 ```
 
 This file defines the project name, which is used throughout the deployment process for resource naming and organization.
+
+- **project** (required) - defines the project name for all artifacts and deployments
+- **description** (optional) - a textual description of the project
+- **project_policy_path** (optional) - an override of the project policy provided by Seed-Farmer
+- **manifest_validation_fail_on_unknown_fields** (optional) - a boolean field indicating to Seed-Farmer to stop processing if a named key in the manifests is not apart of the defined keys Seed-Farmer expects.  This is `false` by default.
 
 ## Creating a New Project
 
