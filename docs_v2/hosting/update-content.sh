@@ -2,7 +2,7 @@
 set -e
 
 echo "📚 Updating MkDocs site content..."
-SRC_PATH="/home/dgraeber/workplace/seed-group/seed-farmer/docs_v2"
+SRC_PATH="/home/dgraeber/workplace/seed-group/seed-farmer"
 # Build the latest docs
 echo "🔨 Building MkDocs site..."
 cd $SRC_PATH
