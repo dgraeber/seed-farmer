@@ -58,10 +58,11 @@ sequenceDiagram
 ## Key Decision Points
 
 1. **Session Type Detection**: The factory checks the SessionManager type to determine deployment strategy
-2. **Bundle Optimization**: Both strategies check for prebuilt bundles in S3 to avoid redundant builds
+    - Local deployments only support a single account / region and SeedFarmer manages this without the need to change manifests
+2. **Bundle Optimization**: Only remote deployments check for prebuilt bundles in S3 to support destroy processing
 3. **Execution Environment**: 
-   - Local: Runs deployspec commands directly on the local machine
-   - Remote: Creates and executes CodeBuild projects in AWS
+    - Local: Runs deployspec commands directly on the local machine
+    - Remote: Creates and executes CodeBuild projects in AWS
 
 ## Strategy Selection
 

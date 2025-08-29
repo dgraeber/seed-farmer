@@ -104,8 +104,6 @@ nav:
     - CLI Commands: reference/cli-commands.md
     - Manifests: reference/manifests.md
     - Deployspec: reference/deployspec.md
-    - Templates: reference/templates.md
-    - Configuration: reference/configuration.md
     - FAQ: reference/faq.md
   - Sequence Diagrams: 
     - sequence/index.md
