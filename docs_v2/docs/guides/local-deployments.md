@@ -90,8 +90,9 @@ During local deployment, the Docker container automatically:
 Create an `.env` file to store environment variables needed for your deployment:
 
 ```bash
-echo PRIMARY_ACCOUNT=123456789012 >> .env
-echo SECONDARY_ACCOUNT=210987654321 >> .env
+echo AWS_DEFAULT_REGION=us-east-1 >> .env
+echo PRIMARY_ACCOUNT=210987654321 >> .env
+echo BUCKET_NAME=loggingbucket >> .env
 ```
 
 These environment variables can be referenced in your deployment manifest:
@@ -103,15 +104,21 @@ targetAccountMappings:
       valueFrom:
         envVariable: PRIMARY_ACCOUNT
     default: true
-  - alias: secondary
-    accountId:
-      valueFrom:
-        envVariable: SECONDARY_ACCOUNT
+```
+
+## Authentication
+Seed-Farmer local deployments use AWS IAM for authentication, including [AWS CLI profiles](https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-files.html#cli-configure-files-format-profile) and temporary security credentials via [AWS Session credentials](https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-envvars.html). For example, the following can be set in the active session or in the environment file:
+```bash
+export AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+export AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+export AWS_SESSION_TOKEN=AQoEXAMPLEH4aoAH0gNCAPy...truncated...zrkuWJOgQs8IZZaIv2BXIa2R4Olgk
+export AWS_REGION=us-east-1
 ```
 
 ## Single Account/Region Limitation
 
 **Important**: Local deployments are limited to a **single AWS account and region**. This is a fundamental constraint of the local deployment architecture.
+
 
 ### Automatic Region Override
 
