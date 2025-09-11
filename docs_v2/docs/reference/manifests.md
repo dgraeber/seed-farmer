@@ -308,6 +308,87 @@ SEEDFARMER_MODULE_NAME=vpc-network
 SEEDFARMER_GROUP_NAME=networking
 ```
 
+
+## Parameter Referencing in Manifests
+The module manifests allow for custom configuration via the parameters.  Parameters can be referenced in any of the following defined manners.
+
+### User Defined
+These are simple key/value pairs passed in as strings.
+```yaml
+name: metadata-storage
+path: modules/core/metadata-storage/
+parameters:
+  - name: glue-db-suffix
+    value: vsidata
+  - name: rosbag-bagfile-table-suffix
+    value: Rosbag-BagFile-Metadata
+  - name: rosbag-scene-table-suffix
+    value: Rosbag-Scene-Metadata
+```
+
+### Environment
+
+SeedFarmer supports using [Dotenv](https://github.com/theskumar/python-dotenv) for dynamic replacement. When a file named `.env` is placed at the project root (where seedfarmer.yaml resides), any value in a manifest with a key of envVariable will be matched and replaced with the corresponding environment variable. You can pass in overriding .env files by using the `--env-file` on CLI command invocation.
+
+SeedFarmer also supports passing multiple `.env`, by using `--env-file` where subsequent files will override duplicate values. 
+```yaml
+name: opensearch
+path: modules/core/opensearch/
+parameters:
+  - name: vpc-id
+    valueFrom:
+      envVariable: ENV_VPC_ID
+```
+
+### Module Metadata
+
+Metadata output from one module can be pass to another module as input by referencing the module metadata.  In the below example the `networking` module of the `optionals` group as an output named `key` that can used as input to the `opensearch` module.
+
+```yaml
+name: opensearch
+path: modules/core/opensearch/
+parameters:
+  - name: vpc-id
+    valueFrom:
+      moduleMetadata:
+        group: optionals
+        name: networking
+        key: VpcId
+```
+
+
+### AWS SSM Parameter
+When leveraging an SSM Parameter, Seed-Farmer can populate an AWS CodeBuild environment parameter as a `PARAMETER_STORE` type for reference in your module.
+AWS Codebuild manages fetching the value.
+
+```yaml
+name: opensearch
+path: modules/core/opensearch/
+parameters:
+  - name: vpc-id
+    valueFrom:
+      parameterStore: my-vpc-id
+```
+!!! warning "Limited to Remote Deploy"
+      This can only be used with Remote Deployments, not Local Deployments
+
+
+### AWS Secrets Manager
+When leveraging an AWS Secret, Seed-Farmer can populate an AWS CodeBuild environment parameter as a `SECRETS_MANAGER` type for reference in your module.
+This is the recommended means to pass secured info to your module as AWS Codebuild brokers the retrieval.  No information is exposed in clear-text.
+
+```yaml
+name: opensearch
+path: modules/core/opensearch/
+parameters:
+  - name: vpc-id
+    valueFrom:
+      secretsManager: my-secret-vpc-id
+```
+!!! warning "Limited to Remote Deploy"
+      This can only be used with Remote Deployments, not Local Deployments
+
+
 ## Working with Data Files
 
 Modules can include additional data files beyond their core infrastructure code using the `dataFiles` field in module manifests. This is useful for configuration files, scripts, certificates, or other assets needed during deployment.
@@ -520,3 +601,138 @@ parameters:
 
 This structure ensures that the database is created before the application that depends on it, and the application automatically receives the correct database endpoint.
 
+
+## Full Definition - Deployment Manifest 
+
+This definition of a deployment manifest is relatively extensive compared to the module manifests.  The following represents a look-up of the currently available definitions.
+
+```yaml
+name: examples
+nameGenerator:  ## Cannot be used with name ... one or the other
+  prefix: myprefix
+  suffix: 
+    valueFrom:
+        envVariable: SUFFIX_ENV_VARIABLE
+toolchainRegion: us-west-2
+forceDependencyRedeploy: False  ## Force ALL dependent modules to redeploy if an upstream module changes
+archiveSecret: example-archive-credentials-modules ## SecretsManager that contains the credentials to access a private HTTPS archive for the modules
+groups:
+  - name: optionals
+    path: manifests-multi/examples/optional-modules.yaml
+    concurrency: 2 ## Limits the concurrency of module deployments, default matches the number of modules in group
+  - name: optionals-2
+    path: manifests-multi/examples/optional-modules-2.yaml
+targetAccountMappings:
+  - alias: primary ## The reference name modules use to dictate where they are deployed
+    accountId: ${PRIMARY_ACCOUNT}  ## The syntax here support a global replace based on env parameters
+    default: true
+    codebuildImage:  public.ecr.aws/codebuild/amazonlinux2-x86_64-standard:5.0 ## The codebuild image override for all module in this account
+    runtimeOverrides:
+      python: "3.13"
+    npmMirror: https://registry.npmjs.org/  ## Override the default npm mirror of this account
+    npmMirrorSecret: /something/aws-myproject-mirror-credentials ## credentials in SecretsManager to use if necessary
+    pypiMirror: https://pypi.python.org/simple ## Override the default pypi mirror of this account 
+    pypiMirrorSecret: /something/aws-myproject-mirror-mirror-credentials  ## credentials in SecretsManager to use if necessary
+    rolePrefix: /
+    policyPrefix: / 
+    parametersGlobal:
+      dockerCredentialsSecret: nameofsecret
+      permissionsBoundaryName: policyname
+    regionMappings:
+      - region: us-east-2
+        default: true
+        codebuildImage:  public.ecr.aws/codebuild/amazonlinux2-x86_64-standard:5.0 ## The codebuild image override for all module in this region (takes precedence over the account override)
+        runtimeOverrides:
+          python: "3.13"
+        npmMirror: https://registry.npmjs.org/ ## (takes precedence over the account override)
+        npmMirrorSecret: /something/aws-myproject-mirror-credentials ## (takes precedence over the account override)
+        pypiMirror: https://pypi.python.org/simple ## (takes precedence over the account override)
+        pypiMirrorSecret: /something/aws-myproject-mirror-credentials ## (takes precedence over the account override)
+        parametersRegional:  ## Strictly lookup values for the rest of the manifests
+          dockerCredentialsSecret: nameofsecret ## SecretsManager for docker login (to prevent throttling)
+          permissionsBoundaryName: policyname
+          vpcId: vpc-XXXXXXXXX 
+          publicSubnetIds:
+            - subnet-XXXXXXXXX
+            - subnet-XXXXXXXXX
+          privateSubnetIds:
+            - subnet-XXXXXXXXX
+            - subnet-XXXXXXXXX
+          isolatedSubnetIds:
+            - subnet-XXXXXXXXX
+            - subnet-XXXXXXXXX
+          securityGroupsId:
+            - sg-XXXXXXXXX
+        network:  ## Configure the seedkit / codebuild to use a VPC
+            vpcId:  ## REQUIRED if configuring to use a vpc for codebuild
+                valueFrom:
+                parameterValue: vpcId ## The lookup in regionParameters or globalParameters
+            privateSubnetIds: ## REQUIRED if configuring to use a vpc for codebuild
+                valueFrom:
+                parameterValue: privateSubnetIds
+            securityGroupIds: ## REQUIRED if configuring to use a vpc for codebuild
+                valueFrom:
+                parameterValue: securityGroupIds
+  - alias: secondary
+    accountId: 123456789012
+    regionMappings:
+      - region: us-west-2
+        parametersRegional:
+          dockerCredentialsSecret: nameofsecret
+          permissionsBoundaryName: policyname
+      - region: us-east-2
+        default: true
+
+```
+
+!!! info "Deployment Manifest Fields"
+    NOTE: Not all fields are required
+
+    NOTE: not all fields can be used simultaneously!  
+
+Please see the [Sample Manifests](samples.md) for suggestions.
+
+## Full Definition - Module Manifest
+
+
+```yaml
+name: networking
+path: git::https://github.com/awslabs/idf-modules.git/modules/optionals/networking/?ref=release/1.4.0 ## Pull from Git Repo
+targetAccount: primary
+parameters:
+  - name: internet-accessible
+    value: true
+---  ## Multiple modules of a single group defined in one file
+name: buckets
+path: modules/optionals/buckets. ## Local path for module
+targetAccount: secondary
+targetRegion: us-west-2
+codebuildImage:  public.ecr.aws/codebuild/amazonlinux2-x86_64-standard:5.0 ## The codebuild image override for this module (take precedence over all)
+runtimeOverrides:
+  python: "3.13"
+npmMirror: https://registry.npmjs.org/
+npmMirrorSecret: /something/aws-addf-mirror-credentials
+pypiMirror: https://pypi.python.org/simple
+pypiMirrorSecret: /something/aws-addf-mirror-credentials
+parameters:
+  - name: encryption-type
+    value: SSE
+  - name: some-name
+    valueFrom:
+      moduleMetadata:
+        group: optionals
+        name: networking
+        key: VpcId
+dataFiles:
+  - filePath: data/test2.txt
+  - filePath: test1.txt
+  - filePath: git::https://github.com/awslabs/idf-modules.git//modules/storage/buckets/deployspec.yaml?ref=release/1.0.0&depth=1
+  - filePath: archive::https://github.com/awslabs/idf-modules/archive/refs/tags/v1.6.0.tar.gz?module=modules/storage/buckets/deployspec.yaml ## Can pull a tar ot zip archive over HTTPS
+
+```
+
+!!! info "Gitpath Sourcing "
+    The path can be sourced from Git using the [semantic defined by HashiCorp for Terraform](https://developer.hashicorp.com/terraform/language/modules/configuration#generic-git-repository)
+
+
+Please see the [Sample Manifests](samples.md) for suggestions.
