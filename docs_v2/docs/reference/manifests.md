@@ -690,7 +690,6 @@ targetAccountMappings:
 
     NOTE: not all fields can be used simultaneously!  
 
-Please see the [Sample Manifests](samples.md) for suggestions.
 
 ## Full Definition - Module Manifest
 
@@ -733,6 +732,3 @@ dataFiles:
 
 !!! info "Gitpath Sourcing "
     The path can be sourced from Git using the [semantic defined by HashiCorp for Terraform](https://developer.hashicorp.com/terraform/language/modules/configuration#generic-git-repository)
-
-
-Please see the [Sample Manifests](samples.md) for suggestions.

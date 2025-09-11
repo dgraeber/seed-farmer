@@ -33,15 +33,14 @@ deploy:
     pre_build:    # Pre-deployment setup
       commands:
         - echo "Preparing deployment environment"
-        - aws sts get-caller-identity
     build:        # Main deployment logic
       commands:
-        - cdk deploy --all --require-approval never
+        - cdk deploy --require-approval never --progress events --app "python app.py" --outputs-file ./cdk-exports.json
         - echo "Deployment completed successfully"
     post_build:   # Post-deployment tasks
       commands:
         - echo "Exporting module metadata"
-        - seedfarmer metadata convert
+        - seedfarmer metadata convert -f cdk-exports.json
 
 destroy:
   phases:
@@ -54,7 +53,7 @@ destroy:
         - echo "Preparing for resource cleanup"
     build:        # Main destruction logic
       commands:
-        - cdk destroy --all --force
+        - cdk destroy --force --app "python app.py"
         - echo "Resources destroyed successfully"
     post_build:   # Post-destruction cleanup
       commands:
@@ -148,8 +147,7 @@ deploy:
         - echo "Deploying VPC: $SEEDFARMER_PARAMETER_VPC_ID"
         - echo "Instance type: $SEEDFARMER_PARAMETER_INSTANCE_TYPE"
         
-        # Use in CDK deployment
-        - cdk deploy VpcStack --parameters VpcId=$SEEDFARMER_PARAMETER_VPC_ID
+        - cdk deploy --require-approval never --progress events --app "python app.py" --outputs-file ./cdk-exports.json
         
         # Use in CloudFormation
         - aws cloudformation deploy \
@@ -180,12 +178,7 @@ deploy:
     build:
       commands:
         # Use parameters in complex commands
-        - |
-          cdk deploy NetworkStack \
-            --parameters VpcId=$SEEDFARMER_PARAMETER_VPC_ID \
-            --parameters SubnetIds="$SEEDFARMER_PARAMETER_SUBNET_IDS" \
-            --parameters Environment=$SEEDFARMER_PARAMETER_ENVIRONMENT \
-            --outputs-file cdk-outputs.json
+        - cdk deploy --require-approval never --progress events --app "python app.py" --outputs-file ./cdk-exports.json
 ```
 
 ### Working with JSON Parameters
@@ -260,18 +253,13 @@ The `seedfarmer metadata` commands automatically handle the metadata file creati
 ```yaml
 deploy:
   phases:
-    post_build:
+    build:
       commands:
-        # Export CDK outputs automatically
-        - cdk deploy --outputs-file cdk-outputs.json
-        - seedfarmer metadata convert
-        
-        # Add custom key-value metadata
+        # Use parameters in complex commands
+        - cdk deploy --require-approval never --progress events --app "python app.py" --outputs-file ./cdk-exports.json
+        - seedfarmer metadata convert -f cdk-exports.json 
         - seedfarmer metadata add -k VpcId -v vpc-12345678
         - seedfarmer metadata add -k DatabaseEndpoint -v mydb.cluster-xyz.us-east-1.rds.amazonaws.com
-        
-        # Add complex JSON metadata
-        - seedfarmer metadata add -j '{"SubnetIds": ["subnet-123", "subnet-456"], "SecurityGroupId": "sg-789"}'
 ```
 
 ### Method 2: Direct Environment Variable Export
@@ -285,9 +273,7 @@ deploy:
       commands:
         # For generic modules
         - export SEEDFARMER_MODULE_METADATA='{"VpcId": "vpc-12345678", "SubnetIds": ["subnet-123", "subnet-456"]}'
-        
-        # For project-specific modules
-        - export SEEDFARMER_MODULE_METADATA='{"VpcId": "vpc-12345678", "SubnetIds": ["subnet-123", "subnet-456"]}'
+ 
 ```
 
 ### Method 3: Writing to the Metadata File Directly
@@ -310,6 +296,9 @@ deploy:
           EOF
 ```
 
+!!! warning "Use with caution"
+    Seed-Farmer provides commands to automate the addition of data to the output and it is recommended to use them.  
+
 ### Metadata CLI Commands
 
 Seed-Farmer provides helper commands for metadata management:
@@ -328,7 +317,7 @@ seedfarmer metadata add -j '{"key": "value"}'
 seedfarmer metadata depmod
 
 # Get parameter values
-seedfarmer metadata paramvalue -s DEPLOYMENT_NAME
+seedfarmer metadata paramvalue -s SEEDFARMER_DEPLOYMENT_NAME
 ```
 
 #### seedfarmer metadata convert
@@ -343,7 +332,7 @@ deploy:
     build:
       commands:
         # Deploy CDK with outputs file
-        - cdk deploy --all --require-approval never --outputs-file cdk-outputs.json
+        - cdk deploy --require-approval never --progress events --app "python app.py" --outputs-file ./cdk-exports.json
     post_build:
       commands:
         # REQUIRED: Convert CDK outputs to metadata (looks for the module's specific outputs)
@@ -495,7 +484,7 @@ deploy:
   phases:
     build:
       commands:
-        - cdk deploy --all --require-approval never --outputs-file cdk-outputs.json
+        - cdk deploy --require-approval never --progress events --app "python app.py" --outputs-file ./cdk-exports.json
     post_build:
       commands:
         # Automatically convert CDK outputs
@@ -555,19 +544,19 @@ deploy:
 #### Common Problems and Solutions
 
 1. **Metadata not appearing in dependent modules**
-   - Ensure you're exporting metadata in the `post_build` phase
-   - Verify the metadata is valid JSON
-   - Check that the metadata file is being created in the correct location
+    - Ensure you're exporting metadata in the `build` or `post_build` phase
+    - Verify the metadata is valid JSON
+    - Check that the cdk output file is correct
 
 2. **CDK convert command not working**
-   - Ensure your CDK outputs file contains the expected structure
-   - Use `seedfarmer metadata depmod` to get the correct module key
-   - Try using the `-jq` option to specify the exact path to your data
+    - Ensure your CDK outputs file contains the expected structure
+    - Use `seedfarmer metadata depmod` to get the correct module key
+    - Try using the `-jq` option to specify the exact path to your data
 
 3. **JSON parsing errors**
-   - Validate your JSON using `jq` or online JSON validators
-   - Escape quotes properly in shell commands
-   - Use single quotes around JSON strings in YAML
+    - Validate your JSON using `jq` or online JSON validators
+    - Escape quotes properly in shell commands  
+    - Use single quotes around JSON strings in YAML
 
 #### Debugging Metadata
 
@@ -612,7 +601,7 @@ deploy:
         - echo "Environment: $SEEDFARMER_PARAMETER_ENVIRONMENT"
     build:
       commands:
-        - cdk deploy --all --require-approval never --outputs-file cdk-outputs.json
+        - cdk deploy --require-approval never --progress events --app "python app.py" --outputs-file ./cdk-exports.json
         - echo "CDK deployment completed"
     post_build:
       commands:
@@ -754,8 +743,7 @@ deploy:
           fi
     build:
       commands:
-        # Use error handling in deployment commands
-        - cdk deploy --all --require-approval never || exit 1
+        - cdk deploy --require-approval never --progress events --app "python app.py" --outputs-file ./cdk-exports.json
         - echo "Deployment successful"
 ```
 
@@ -782,70 +770,3 @@ deploy:
 3. **Use parallel operations** where safe to do so
 4. **Minimize network calls** during deployment
 5. **Clean up temporary files** to avoid storage issues
-
-## Common Patterns
-
-### Conditional Deployment
-
-```yaml
-deploy:
-  phases:
-    build:
-      commands:
-        - |
-          if [ "$SEEDFARMER_PARAMETER_ENABLE_MONITORING" = "true" ]; then
-            echo "Deploying monitoring stack"
-            cdk deploy MonitoringStack
-          else
-            echo "Skipping monitoring deployment"
-          fi
-```
-
-### Multi-Stack Deployment
-
-```yaml
-deploy:
-  phases:
-    build:
-      commands:
-        # Deploy stacks in order
-        - cdk deploy NetworkStack --outputs-file network-outputs.json
-        - cdk deploy ComputeStack --outputs-file compute-outputs.json
-        - cdk deploy ApplicationStack --outputs-file app-outputs.json
-    post_build:
-      commands:
-        # Combine all outputs
-        - |
-          jq -s 'add' *-outputs.json > combined-outputs.json
-          OUTPUTS=$(cat combined-outputs.json)
-          seedfarmer metadata add -j "$OUTPUTS"
-```
-
-### Environment-Specific Configuration
-
-```yaml
-deploy:
-  phases:
-    pre_build:
-      commands:
-        - |
-          case "$SEEDFARMER_PARAMETER_ENVIRONMENT" in
-            "dev")
-              export INSTANCE_TYPE="t3.micro"
-              export MIN_CAPACITY="1"
-              ;;
-            "prod")
-              export INSTANCE_TYPE="t3.large"
-              export MIN_CAPACITY="3"
-              ;;
-            *)
-              echo "Unknown environment: $SEEDFARMER_PARAMETER_ENVIRONMENT"
-              exit 1
-              ;;
-          esac
-    build:
-      commands:
-        - cdk deploy --parameters InstanceType=$INSTANCE_TYPE --parameters MinCapacity=$MIN_CAPACITY
-```
-
-The deployspec is your module's execution engine. By understanding how parameters are transformed into environment variables and following these patterns, you can create robust, reusable infrastructure modules that integrate seamlessly with Seed-Farmer's orchestration capabilities.
