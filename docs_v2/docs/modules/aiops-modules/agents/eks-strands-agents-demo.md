@@ -15,4 +15,4 @@ The module will:
 
 ## Source
 
-[View on GitHub](https://github.com/awslabs/idf-modules/tree/main/modules/agents/eks-strands-agents-demo)
+[View on GitHub](https://github.com/awslabs/aiops-modules/tree/main/modules/agents/eks-strands-agents-demo)

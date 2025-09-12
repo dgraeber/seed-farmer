@@ -19,4 +19,4 @@ This module creates a Ray cluster in AWS EKS Kubernetes cluster. It deploys a Ra
 
 ## Source
 
-[View on GitHub](https://github.com/awslabs/idf-modules/tree/main/modules/eks/ray-cluster)
+[View on GitHub](https://github.com/awslabs/aiops-modules/tree/main/modules/eks/ray-cluster)

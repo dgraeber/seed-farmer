@@ -64,4 +64,4 @@ More information on using a public workforce like Amazon Mechanical Turk is avai
 
 ## Source
 
-[View on GitHub](https://github.com/awslabs/idf-modules/tree/main/modules/sagemaker/sagemaker-ground-truth-labeling)
+[View on GitHub](https://github.com/awslabs/aiops-modules/tree/main/modules/sagemaker/sagemaker-ground-truth-labeling)

@@ -28,4 +28,4 @@ By default, uses Elastic File System for backend storage and S3 for artifact sto
 
 ## Source
 
-[View on GitHub](https://github.com/awslabs/idf-modules/tree/main/modules/mlflow/mlflow-fargate)
+[View on GitHub](https://github.com/awslabs/aiops-modules/tree/main/modules/mlflow/mlflow-fargate)

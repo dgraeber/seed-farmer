@@ -20,4 +20,4 @@ This module creates a SageMaker Model Package Group to register and version Sage
 
 ## Source
 
-[View on GitHub](https://github.com/awslabs/idf-modules/tree/main/modules/sagemaker/sagemaker-model-package-group)
+[View on GitHub](https://github.com/awslabs/aiops-modules/tree/main/modules/sagemaker/sagemaker-model-package-group)

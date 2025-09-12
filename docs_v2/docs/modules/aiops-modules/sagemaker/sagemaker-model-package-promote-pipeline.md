@@ -21,4 +21,4 @@ A Seedfarmer module to deploy a Pipeline to promote SageMaker Model Packages in 
 
 ## Source
 
-[View on GitHub](https://github.com/awslabs/idf-modules/tree/main/modules/sagemaker/sagemaker-model-package-promote-pipeline)
+[View on GitHub](https://github.com/awslabs/aiops-modules/tree/main/modules/sagemaker/sagemaker-model-package-promote-pipeline)

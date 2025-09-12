@@ -19,4 +19,4 @@ This module creates a [MLFlow AI Gateway](https://mlflow.org/docs/latest/llms/in
 
 ## Source
 
-[View on GitHub](https://github.com/awslabs/idf-modules/tree/main/modules/mlflow/mlflow-ai-gw-image)
+[View on GitHub](https://github.com/awslabs/aiops-modules/tree/main/modules/mlflow/mlflow-ai-gw-image)

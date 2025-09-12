@@ -8,14 +8,12 @@ The **Artificial Intelligence Operations (AIOps)** modules provide specialized i
 
 ## Available Modules
 
-**_Coming Soon_** - _Feel free to directly access the Git Repository listed above in the meantime._
-
-We will provide a comprehensive list of:
-
-- current modules available
-- description of each module
-- input and output definitions
-- example manifest configurations
+- **[Agents](./agents/index.md)** - AI agent frameworks and demonstration implementations
+- **[EKS](./eks/index.md)** - Ray clusters, operators, and Kubernetes-based ML infrastructure
+- **[Examples](./examples/index.md)** - Complete example implementations and MLOps pipelines
+- **[FMOps](./fmops/index.md)** - Foundation Model Operations with Bedrock and SageMaker JumpStart
+- **[MLflow](./mlflow/index.md)** - Experiment tracking, model registry, and model serving
+- **[SageMaker](./sagemaker/index.md)** - Notebooks, studios, endpoints, and ML CI/CD pipelines
 
 ## Key Features
 

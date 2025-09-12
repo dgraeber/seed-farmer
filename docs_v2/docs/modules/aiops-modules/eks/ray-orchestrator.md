@@ -21,4 +21,4 @@ This module orchestrates submission of a Ray training job to the Ray Cluster and
 
 ## Source
 
-[View on GitHub](https://github.com/awslabs/idf-modules/tree/main/modules/eks/ray-orchestrator)
+[View on GitHub](https://github.com/awslabs/aiops-modules/tree/main/modules/eks/ray-orchestrator)

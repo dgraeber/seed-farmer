@@ -23,4 +23,4 @@ The module uses [AWS Generative AI CDK Constructs](https://github.com/awslabs/ge
 
 ## Source
 
-[View on GitHub](https://github.com/awslabs/idf-modules/tree/main/modules/fmops/sagemaker-jumpstart-fm-endpoint)
+[View on GitHub](https://github.com/awslabs/aiops-modules/tree/main/modules/fmops/sagemaker-jumpstart-fm-endpoint)

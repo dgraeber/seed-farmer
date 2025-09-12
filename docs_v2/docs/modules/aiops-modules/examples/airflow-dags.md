@@ -29,4 +29,4 @@ This module demonstrates:
 
 ## Source
 
-[View on GitHub](https://github.com/awslabs/idf-modules/tree/main/modules/examples/airflow-dags)
+[View on GitHub](https://github.com/awslabs/aiops-modules/tree/main/modules/examples/airflow-dags)

@@ -13,4 +13,4 @@ This module demonstrates an example on how to build a custom Ray Docker image. T
 
 ## Source
 
-[View on GitHub](https://github.com/awslabs/idf-modules/tree/main/modules/eks/ray-image)
+[View on GitHub](https://github.com/awslabs/aiops-modules/tree/main/modules/eks/ray-image)

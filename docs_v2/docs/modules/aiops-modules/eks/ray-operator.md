@@ -27,4 +27,4 @@ This module runs Ray Operator in AWS EKS Kubernetes cluster. It deploys a KubeRa
 
 ## Source
 
-[View on GitHub](https://github.com/awslabs/idf-modules/tree/main/modules/eks/ray-operator)
+[View on GitHub](https://github.com/awslabs/aiops-modules/tree/main/modules/eks/ray-operator)

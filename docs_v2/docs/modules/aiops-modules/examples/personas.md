@@ -25,4 +25,4 @@ The module creates separate roles with appropriate permissions and policies for 
 
 ## Source
 
-[View on GitHub](https://github.com/awslabs/idf-modules/tree/main/modules/examples/personas)
+[View on GitHub](https://github.com/awslabs/aiops-modules/tree/main/modules/examples/personas)

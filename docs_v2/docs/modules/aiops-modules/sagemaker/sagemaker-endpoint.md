@@ -36,4 +36,4 @@ where endpoints are provisioned as part of automated Continuous Integration and 
 
 ## Source
 
-[View on GitHub](https://github.com/awslabs/idf-modules/tree/main/modules/sagemaker/sagemaker-endpoint)
+[View on GitHub](https://github.com/awslabs/aiops-modules/tree/main/modules/sagemaker/sagemaker-endpoint)

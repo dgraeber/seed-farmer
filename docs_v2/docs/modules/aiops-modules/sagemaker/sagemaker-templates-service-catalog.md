@@ -9,4 +9,4 @@
 
 ## Source
 
-[View on GitHub](https://github.com/awslabs/idf-modules/tree/main/modules/sagemaker/sagemaker-templates-service-catalog)
+[View on GitHub](https://github.com/awslabs/aiops-modules/tree/main/modules/sagemaker/sagemaker-templates-service-catalog)

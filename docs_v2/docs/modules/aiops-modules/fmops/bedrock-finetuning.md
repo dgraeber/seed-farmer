@@ -42,4 +42,4 @@ parameters:
 
 ## Source
 
-[View on GitHub](https://github.com/awslabs/idf-modules/tree/main/modules/fmops/bedrock-finetuning)
+[View on GitHub](https://github.com/awslabs/aiops-modules/tree/main/modules/fmops/bedrock-finetuning)

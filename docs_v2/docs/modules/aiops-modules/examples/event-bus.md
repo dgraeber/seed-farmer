@@ -20,4 +20,4 @@ This module creates an Amazon EventBridge Bus for cross-account events.
 
 ## Source
 
-[View on GitHub](https://github.com/awslabs/idf-modules/tree/main/modules/examples/event-bus)
+[View on GitHub](https://github.com/awslabs/aiops-modules/tree/main/modules/examples/event-bus)

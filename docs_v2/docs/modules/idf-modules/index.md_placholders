@@ -8,16 +8,15 @@ The **Industry Data Framework (IDF)** modules provide foundational infrastructur
 
 ## Available Modules
 
-- **[Compute](./compute/index.md)** - EKS clusters, EMR, and AWS Batch configurations
-- **[Database](./database/index.md)** - RDS and Neptune database services
-- **[Dummy](./dummy/index.md)** - Template and example modules for development
-- **[Integration](./integration/index.md)** - Integration patterns and connectors for data workflows
-- **[Network](./network/index.md)** - VPCs, subnets, and security groups
-- **[Orchestration](./orchestration/index.md)** - Amazon MWAA (Managed Apache Airflow)
-- **[Replication](./replication/index.md)** - Data and container image replication utilities
-- **[Service Catalog](./service-catalog/index.md)** - AWS Service Catalog and application registry
-- **[Storage](./storage/index.md)** - S3 buckets, EFS, FSx Lustre, and OpenSearch
-- **[Testing](./testing/index.md)** - Testing frameworks and integration utilities
+**_Coming Soon_** - _Feel free to directly access the Git Repository listed above in the meantime._
+
+We will provide a comprehensive list of:
+
+- current modules available
+- description of each module
+- input and output definitions
+- example manifest configurations
+
 
 ## Key Features
 

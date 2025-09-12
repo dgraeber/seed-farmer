@@ -19,4 +19,4 @@ This module creates an mlflow tracking server container image and pushes to the 
 
 ## Source
 
-[View on GitHub](https://github.com/awslabs/idf-modules/tree/main/modules/mlflow/mlflow-image)
+[View on GitHub](https://github.com/awslabs/aiops-modules/tree/main/modules/mlflow/mlflow-image)
