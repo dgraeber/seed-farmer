@@ -147,6 +147,32 @@ parameters:
 
 ### Critical Fields Explained
 
+#### Path
+The path element tells Seed-Farmer where to fetch the module code in order to package it for deployment. Currently modules can be sourced from:
+    
+  - Local Filesystem
+  - Git Repositories
+  - Archives (zip and tar via HTTPS)
+
+These are all valid paths:
+```yaml
+path: module/module-name
+
+path: git::https://github.com/awslabs/idf-modules.git//modules/dummy/blank?ref=release/1.2.0
+
+path: git::https://github.com/awslabs/idf-modules.git//modules/dummy/blank/?ref=2d0aee3880bbf195129c441529f91ad074983037
+
+path: archive::https://myhostedurl.com/allmymodules.zip?module=modules/network/codebuild-security-group
+
+```
+
+
+
+!!! info "Module Sourcing "
+
+    Please see [Module Sourcing](conventions.md/#module-sourcing) for details
+
+
 #### Module Dependencies
 Modules can reference outputs from other modules using `moduleMetadata`:
 
@@ -330,7 +356,7 @@ parameters:
 
 SeedFarmer supports using [Dotenv](https://github.com/theskumar/python-dotenv) for dynamic replacement. When a file named `.env` is placed at the project root (where seedfarmer.yaml resides), any value in a manifest with a key of envVariable will be matched and replaced with the corresponding environment variable. You can pass in overriding .env files by using the `--env-file` on CLI command invocation.
 
-SeedFarmer also supports passing multiple `.env`, by using `--env-file` where subsequent files will override duplicate values. 
+SeedFarmer supports passing multiple `.env`, by using `--env-file` where subsequent files will override duplicate values. 
 ```yaml
 name: opensearch
 path: modules/core/opensearch/
@@ -339,6 +365,12 @@ parameters:
     valueFrom:
       envVariable: ENV_VPC_ID
 ```
+
+!!! info "Global Replacement in Manifests"
+    Seed-Farmer does support global dynamic replacement of values in the manifests.
+
+    Please see [Global Overrides](conventions.md/#global-replace-in-manifests)
+
 
 ### Module Metadata
 
@@ -730,5 +762,3 @@ dataFiles:
 
 ```
 
-!!! info "Gitpath Sourcing "
-    The path can be sourced from Git using the [semantic defined by HashiCorp for Terraform](https://developer.hashicorp.com/terraform/language/modules/configuration#generic-git-repository)
