@@ -539,7 +539,7 @@ forceDependencyRedeploy: true
 ```
 
 !!! warning "Use with Caution"
-    This flag causes ALL dependent modules to redeploy when ANY dependency changes, even if the change doesn't affect them. This can lead to unnecessary redeployments and potential service disruptions.
+    This flag causes ALL dependent modules to redeploy when ANY dependency changes, even if the change doesn't affect them. This can lead to unnecessary re-deployments and potential service disruptions.
 
 ## Best Practices
 

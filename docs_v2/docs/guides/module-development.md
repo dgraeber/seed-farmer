@@ -127,7 +127,7 @@ For comprehensive information about deployspec structure, parameter handling, me
 
 ## Module README
 
-As part of the process to promote reusability and sharability of the modules, each module is required to have a README.md that talks directly to end users and describes:
+As part of the process to promote reusability of the modules, each module is required to have a README.md that talks directly to end users and describes:
 
 - The description of the module
 - The inputs - parameter names
