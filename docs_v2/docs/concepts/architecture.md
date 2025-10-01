@@ -200,7 +200,7 @@ graph TD
 
 The groups are deployed as a **Directed Acyclic Graph (DAG)** and the module dependency relationships are aligned to the groups of the DAG.
 
-Here's a basic DAG structure showing a possible workflow pattern:
+Here's a basic DAG structure showing a possible workflow pattern and module dependency relationships:
 
 ```mermaid
 graph LR
