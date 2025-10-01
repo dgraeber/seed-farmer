@@ -197,12 +197,42 @@ graph TD
 
 ### Dependency Management
 
-Seed-Farmer provides sophisticated dependency management:
+
+The groups are deployed as a **Directed Acyclic Graph (DAG)** and the module dependency relationships are aligned to the groups of the DAG.
+
+Here's a basic DAG structure showing a possible workflow pattern:
+
+```mermaid
+graph LR
+    A((Group 1 Modules)) --> B((Group 2 Modules))
+    B --> C((Group 3 Modules))
+    C --> D((Group 4 Modules))
+    D --> E((Group 5 Modules))
+    A --> C
+    C --> E
+    B --> E
+
+
+    %% Global style: Same fill, stroke, text color
+    classDef uniform fill:#448bae,stroke:#d8a932,stroke-width:3px,color:#063d59;
+
+    %% Apply the style to all nodes
+    class Source,A,B,C,D,E uniform;
+```
+
+This allows Seed-Farmer to provide sophisticated dependency management:
 
 - **Automatic Ordering**: Analyzes module dependencies and determines deployment order
 - **Circular Detection**: Prevents invalid circular dependencies
 - **Validation**: Blocks destruction of modules with active dependents
 - **Force Redeploy**: Option to cascade changes through dependency chains
+
+### Force Dependency Redeploy
+
+When a module changes (is redeployed), downstream modules that are dependent on it may need to consume those changes. The `forceDependencyRedeploy` flag in the deployment manifest tells Seed-Farmer to force a redeploy of all modules impacted by the redeploy of another module.
+
+!!! warning
+    This is an indiscriminate feature that is not granular enough to detect what is causing a redeploy, only that one needs to occur. Any change to a module will trigger a redeploy of that module and all downstream modules that depend on it, even if the underlying logic or artifact has not changed.
 
 
 ## Seedkit Infrastructure
@@ -442,13 +472,7 @@ Seed-Farmer has a shared-responsibility model for dependency management of modul
 
 However, it is up to the end user to be aware of and manage the relationships between modules to assess the impact of changes to modules via redeployment.
 
-### Force Dependency Redeploy
-
-When a module changes (is redeployed), downstream modules that are dependent on it may need to consume those changes. The `forceDependencyRedeploy` flag in the deployment manifest tells Seed-Farmer to force a redeploy of all modules impacted by the redeploy of another module.
-
-!!! warning
-    This is an indiscriminate feature that is not granular enough to detect what is causing a redeploy, only that one needs to occur. Any change to a module will trigger a redeploy of that module and all downstream modules that depend on it, even if the underlying logic or artifact has not changed.
 
 ## Conclusion
 
-The Seed-Farmer architecture provides a secure, flexible, and scalable way to deploy infrastructure across multiple AWS accounts and regions. By leveraging AWS CodeBuild, it ensures that deployments are repeatable, auditable, and follow the principle of least privilege.
+The Seed-Farmer architecture provides a secure, flexible, and scalable way to deploy infrastructure across multiple AWS accounts and regions. By leveraging AWS CodeBuild, it ensures that deployments are repeatable, auditable, and follow the principle of least privilege
