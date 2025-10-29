@@ -6,7 +6,7 @@ This page answers common questions about Seed-Farmer and provides solutions to c
 
 ### What is Seed-Farmer?
 
-Seed-Farmer is a Python-based CI/CD library that leverages the GitOps paradigm to manage deployed code. It is a tooling-agnostic deployment framework that supports AWS CDK, CloudFormation, Terraform, and other infrastructure-as-code tools.
+Seed-Farmer is a Python-based CI/CD library that leverages the [GitOps](https://opengitops.dev/) paradigm to manage deployed code. It is a tooling-agnostic deployment framework that supports AWS CDK, CloudFormation, Terraform, and other infrastructure-as-code tools.
 
 ### How does Seed-Farmer differ from other deployment tools?
 

@@ -4,7 +4,7 @@ This guide covers how to structure and organize Seed-Farmer projects effectively
 
 ## Understanding Seed-Farmer Projects
 
-A Seed-Farmer project is a collection of Infrastructure as Code (IaC) modules organized using GitOps principles. Projects use manifest files to define deployments and orchestrate the deployment of modules across multiple AWS accounts and regions.
+A Seed-Farmer project is a collection of Infrastructure as Code (IaC) modules organized using [GitOps](https://opengitops.dev/) principles. Projects use manifest files to define deployments and orchestrate the deployment of modules across multiple AWS accounts and regions.
 
 ### Key Concepts
 

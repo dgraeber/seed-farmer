@@ -1,6 +1,6 @@
 # Seed-Farmer Documentation
 
-Welcome to the official documentation for Seed-Farmer, a Python-based CI/CD library that leverages the GitOps paradigm to manage deployed code.
+Welcome to the official documentation for Seed-Farmer, a Python-based CI/CD library that leverages the [GitOps](https://opengitops.dev/) paradigm to manage deployed code.
 
 ## What is Seed-Farmer?
 
@@ -16,7 +16,7 @@ Key features include:
 - **Tooling Agnosticism**: Support for various IaC tools (CDK, CloudFormation, Terraform)
 - **GitOps Workflow**: Code-driven deployments with state management
 
-## Core Concepts
+## Concepts
 
 Seed-Farmer organizes deployments within scoped hierarchies to insulate artifacts from one another, following the principals of least-privilege and dedicated access roles.  Within a scoped unit, all artifacts are named according to this structured to prevent resource collisions. 
 
@@ -26,6 +26,8 @@ Seed-Farmer organizes deployments within scoped hierarchies to insulate artifact
 - **Module**: The actual deployable unit of code
 
 Seed-Farmer supports multi-account / multi-region deployments scoped to individual modules within a project.
+
+Please see the [Concepts](concepts/index.md) page for an in-depth explanation.
 
 
 ## Getting Started
@@ -43,6 +45,7 @@ This documentation is organized into the following sections:
 - **Getting Started**: Installation and initial setup guides
 - **Concepts**: Core concepts and architecture
 - **Guides**: How-to guides for common tasks
+- **Sequence Diagrams**: Sequence diagrams of important processes with SeedFarmer
 - **Reference**: Detailed reference documentation for CLI commands, manifests, and module development
 - **Public Modules**: Listing of Seed-Farmer compliant OpenSource modules ready for use
 - **AI Support**: Artificial Intelligence support for Seed-Farmer module development

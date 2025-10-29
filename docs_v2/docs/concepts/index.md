@@ -1,10 +1,10 @@
-# Core Concepts
+# Concepts
 
 This section explains the fundamental concepts behind Seed-Farmer, providing a deeper understanding of how the system works and its key architectural principles.
 
 ## Overview
 
-Seed-Farmer is a GitOps-based framework for deploying Infrastructure as Code (IaC) modules across multiple AWS accounts and regions. It orchestrates deployments using AWS CodeBuild while maintaining security, scalability, and auditability.
+Seed-Farmer is a [GitOps-based](https://opengitops.dev/) framework for deploying Infrastructure as Code (IaC) modules across multiple AWS accounts and regions. It orchestrates deployments using AWS CodeBuild while maintaining security, scalability, and auditability.
 
 ## Architecture
 
@@ -137,7 +137,7 @@ Security is enforced through account boundaries:
 
 ## GitOps Principles
 
-Seed-Farmer follows GitOps best practices:
+Seed-Farmer follows [GitOps](https://opengitops.dev/) best practices:
 
 - **Declarative configuration**: Infrastructure defined in manifest files
 - **Version control**: All configurations stored in Git repositories

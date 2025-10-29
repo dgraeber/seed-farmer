@@ -110,8 +110,6 @@ nav:
     - sequence/index.md
     - Deployment Workflow: sequence/apply-deployment-workflow.md
     - Module Deployment Strategies: sequence/module-deployment-strategies.md
-    - Dependency Resolution Workflow: sequence/dependency-resolution-workflow.md
-    - Bundle Workflow: sequence/bundle-management-workflow.md
     - SSM Metadata Tracking: sequence/ssm-metadata-tracking.md
   - Public Modules:
     - Overview: modules/index.md
