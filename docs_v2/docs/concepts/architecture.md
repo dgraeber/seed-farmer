@@ -54,10 +54,9 @@ Seed-Farmer implements a comprehensive **least-privilege security model** with m
 - **Location**: Toolchain account
 - **Purpose**: Orchestrates deployments and manages metadata
 - **Permissions**: 
-
-  - Read/write deployment metadata in AWS Systems Manager
-  - Assume deployment roles in target accounts
-  - Manage project-level resources
+    - Read/write deployment metadata in AWS Systems Manager
+    - Assume deployment roles in target accounts
+    - Manage project-level resources
 - **Trust Policy**: Trusted by specified principals (users, CI/CD systems)
 
 #### 2. Deployment Role
@@ -352,13 +351,10 @@ targetAccountMappings:
 ### Seedkit Lifecycle Management
 
 #### Updates
-The seedkit is automatically updated when:
-- Seed-Farmer version changes require new features
-- Project configuration changes affect infrastructure
-- Manual update is requested via `--update-seedkit` flag
+The seedkit is not automatically updated.  A manual update is requested via `--update-seedkit` flag when using the `seedfarmer seedkit` CLI.  This is to prevent accidential updates when changing SeedFarmer versions, or if making customizations to the seedkit artifacts (ex. the managed policy).
 
 #### Deletion
-When destroying a complete deployment:
+The seedkit can be destroyed via the `seedfarmer destroy` CLI, but it is not discriminate (it does no checking of dependencies).
 
 ```bash
 # Remove seedkit along with deployment
@@ -373,59 +369,6 @@ seedfarmer destroy my-deployment --remove-seedkit
     - CloudWatch logs (subject to retention policy)
     
     Deployed modules remain unaffected, but you lose deployment history and the ability to destroy modules through Seed-Farmer.
-
-### Multi-Account Seedkit Strategy
-
-#### Per-Account Deployment
-Each target account gets its own seedkit:
-
-- **Isolation**: Account-level isolation for security and compliance
-- **Customization**: Account-specific configuration and networking
-- **Independence**: Failures in one account don't affect others
-
-#### Cross-Region Considerations
-Seedkits are deployed per-region within each account:
-
-- **Regional Resources**: CodeBuild projects are region-specific
-- **Data Locality**: S3 buckets and logs stay within region
-- **Compliance**: Meets data residency requirements
-
-### Troubleshooting Seedkit Issues
-
-#### Common Problems
-
-**Seedkit Deployment Failures**:
-
-- Check IAM permissions for bootstrap operations
-- Verify account limits for CodeBuild projects
-- Ensure S3 bucket naming doesn't conflict
-
-**CodeBuild Execution Issues**:
-
-- Review CloudWatch logs for detailed error messages
-- Check VPC configuration for network connectivity
-- Verify IAM role permissions for module operations
-
-**S3 Access Problems**:
-
-- Confirm bucket policies allow required operations
-- Check encryption settings and KMS permissions
-- Verify cross-account access configuration
-
-#### Debugging Commands
-
-```bash
-# List seedkit status across accounts
-seedfarmer list deployments
-
-# Check specific account/region seedkit
-aws cloudformation describe-stacks --stack-name aws-codeseeder-myproject
-
-# View CodeBuild project details
-aws codebuild batch-get-projects --names codeseeder-myproject
-```
-
-The seedkit is essential for Seed-Farmer operations, providing the secure, scalable infrastructure needed for module deployments across multiple AWS accounts and regions.
 
 ## Seed-Farmer Artifacts
 

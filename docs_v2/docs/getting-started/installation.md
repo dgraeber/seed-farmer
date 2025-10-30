@@ -9,6 +9,7 @@ Before installing Seed-Farmer, ensure you have the following prerequisites:
 - **Python >=3.11** - SeedFarmer runs in python
 - **AWS CLI** - For configuring credentials on compute
 - **AWS CDK and CDK Bootstrap** (recommended) - the majority of SeedFarmer [Public Modules](../modules/index.md) use AWS CDkv2
+- **Python Management Tool** - [uv](https://docs.astral.sh/uv/) or [pip](https://pypi.org/project/pip/)
 
 ## Installing Seed-Farmer
 
@@ -66,6 +67,8 @@ To verify that Seed-Farmer is installed correctly, run:
 
 ```bash
 seedfarmer --version
+
+seedfarmer, version 7.0.12
 ```
 
 This should display the version of Seed-Farmer that you have installed.
@@ -74,21 +77,7 @@ This should display the version of Seed-Farmer that you have installed.
 
 ### AWS CLI and Credentials
 
-Install the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
-
-Seed-Farmer uses the AWS credentials configured in your environment. You can configure these using the AWS CLI:
-
-```bash
-aws configure
-```
-
-Alternatively, you can set the following environment variables:
-
-```bash
-export AWS_ACCESS_KEY_ID=your-access-key
-export AWS_SECRET_ACCESS_KEY=your-secret-key
-export AWS_REGION=your-region
-```
+Install the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) and configure your perferred method of [AWS Credentials](https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-files.html). 
 
 ### AWS CDK
 

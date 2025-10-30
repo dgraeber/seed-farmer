@@ -32,19 +32,17 @@ Understanding Seed-Farmer's hierarchical structure is essential for effective us
 
 A **project** is the top-level organizational unit in Seed-Farmer:
 
-- Has a direct one-to-one relationship with AWS infrastructure
 - Provides complete isolation between different projects
 - Contains all deployments, groups, and modules for a specific initiative
-- Defined by the `seedfarmer.yaml` configuration file
+- Defined in the `seedfarmer.yaml` configuration file
 
 ### Deployment
 
 A **deployment** represents a complete set of infrastructure for a specific environment:
 
 - Contains all modules and their configurations for an environment (e.g., dev, staging, prod)
-- Provides isolation between different environments within the same project
+- Provides a logical isolation between different environments within the same project
 - Manages state and metadata for all contained modules
-- Defined by deployment manifest files
 
 ### Group
 
@@ -59,10 +57,9 @@ A **group** represents modules that can be deployed concurrently:
 
 A **module** is the fundamental deployable unit:
 
-- Contains Infrastructure as Code (CDK, CloudFormation, Terraform, etc.)
+- Contains Infrastructure as Code
 - Can be deployed multiple times with different configurations
 - Exports metadata for consumption by dependent modules
-- Defined by `deployspec.yaml` and module manifests
 
 ![Project Definition](../static/project-definition_transparent.png)
 
@@ -86,18 +83,9 @@ Seed-Farmer supports two execution models:
 
 ## Data Flow and Integration
 
-### Metadata Sharing
-
-Modules communicate through a metadata system:
-
-- **Export**: Modules export outputs as JSON metadata
-- **Import**: Dependent modules reference metadata as parameters
-- **Storage**: Metadata stored in AWS Systems Manager Parameter Store
-- **Versioning**: Metadata tracked per deployment for consistency
-
 ### Parameter System
 
-Seed-Farmer has a comprehensive parameter system supporting:
+Seed-Farmer has a comprehensive configuration system (parameters) supporting:
 
 - **Static values**: Direct parameter values in manifests
 - **Environment variables**: Runtime values from environment
@@ -105,6 +93,16 @@ Seed-Farmer has a comprehensive parameter system supporting:
 - **AWS SSM Parameter Store**: Centralized parameter management
 - **AWS Secrets Manager**: Secure handling of sensitive values
 - **Global and regional parameters**: Shared values across modules
+
+### Metadata Sharing
+
+Modules share references of deployed artifacts via a metadata management system:
+
+- **Export**: Modules export outputs as JSON metadata
+- **Import**: Dependent modules reference metadata as parameters
+- **Storage**: Metadata stored in [AWS SSM Parameter Store](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html),
+- **Versioning**: Metadata tracked per deployment for consistency
+
 
 ### State Management
 
@@ -147,7 +145,7 @@ Seed-Farmer follows [GitOps](https://opengitops.dev/) best practices:
 
 ### Parallel Execution
 
-Seed-Farmer optimizes deployment performance through:
+Seed-Farmer optimizes deployment performance by parallelizing grouped module deployment.  Each module deployment execution is independent: failure of one module within the group does not impact the other modules in that group...but after all modules within the group complete, SeedFarmer halts deployment. 
 
 - **Module-level parallelism**: Modules within groups deploy concurrently
 - **Account-level parallelism**: Multi-account deployments run in parallel

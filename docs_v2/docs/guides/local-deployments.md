@@ -63,27 +63,6 @@ These images are required for using Local Deployments:
 !!! info "CodeBuild Agent"
     Local deployments use Docker to simulate the AWS CodeBuild environment. For more information about CodeBuild's local execution capabilities, see the [AWS CodeBuild Agent documentation](https://docs.aws.amazon.com/codebuild/latest/userguide/use-codebuild-agent.html).
 
-## Environment Setup
-
-Seed-Farmer uses **uv** for Python environment management both locally and within Docker containers. Install Seed-Farmer using `uv`:
-
-```bash
-# Install uv if not already installed
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Create a virtual environment and install Seed-Farmer
-uv venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-uv pip install seed-farmer
-
-# Or install as a tool (recommended)
-uv tool install seed-farmer
-```
-
-During local deployment, the Docker container automatically:
-- Creates a Python virtual environment using `uv`
-- Installs the correct version of seed-farmer with `uv tool install`
-- Manages all Python dependencies within the container using `uv`
 
 ## Environment Variables
 
@@ -95,16 +74,6 @@ echo PRIMARY_ACCOUNT=210987654321 >> .env
 echo BUCKET_NAME=loggingbucket >> .env
 ```
 
-These environment variables can be referenced in your deployment manifest:
-
-```yaml
-targetAccountMappings:
-  - alias: primary
-    accountId:
-      valueFrom:
-        envVariable: PRIMARY_ACCOUNT
-    default: true
-```
 
 ## Authentication
 Seed-Farmer local deployments use AWS IAM for authentication, including [AWS CLI profiles](https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-files.html#cli-configure-files-format-profile) and temporary security credentials via [AWS Session credentials](https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-envvars.html). For example, the following can be set in the active session or in the environment file:
@@ -144,27 +113,7 @@ targetAccountMappings:
 
 During local deployment, all modules will deploy to your current AWS session's region (e.g., `us-west-2` if that's your configured region).
 
-## Seedkit Dependency
 
-Local deployments **require the seedkit infrastructure** to be deployed in your target account and region, just like remote deployments. The seedkit provides essential services:
-
-- **S3 bucket**: For storing deployment bundles and artifacts
-- **IAM roles**: For module execution permissions
-- **CloudWatch logs**: For deployment logging
-- **Metadata storage**: For tracking deployment state
-
-### Ensuring Seedkit is Available
-
-The seedkit is automatically deployed during your first deployment (local or remote). To verify it exists:
-
-```bash
-# Check if seedkit stack exists
-aws cloudformation describe-stacks --stack-name aws-codeseeder-myproject
-
-```
-If the seedkit is not deployed, seedfarmer will automatically deploy it on the first execution.
-
-For more information about the seedkit, see [Seedkit Infrastructure](../concepts/architecture.md#seedkit-infrastructure).
 
 ## Local Deployment Process
 
@@ -239,110 +188,7 @@ Destroy the deployment when finished:
 seedfarmer destroy examples --local
 ```
 
-## Working with Local Modules
-
-When developing modules locally, you can reference them in your module manifest using a relative path:
-
-```yaml
-name: networking
-path: modules/optionals/networking/
-targetAccount: primary
-parameters:
-  - name: internet-accessible
-    value: true
-```
-
-This allows you to make changes to the module code and test them locally before committing them to a repository.
-
-## Working with Remote Modules
-
-You can also reference modules from remote repositories:
-
-```yaml
-name: networking
-path: git::https://github.com/awslabs/idf-modules.git//modules/network/basic-cdk?ref=release/1.0.0&depth=1
-targetAccount: primary
-parameters:
-  - name: internet-accessible
-    value: true
-```
-
-This allows you to use modules from other repositories without having to clone them locally.
-
-## Working with Data Files
-
-You can include data files in your module deployment using the `dataFiles` field in the module manifest:
-
-```yaml
-name: networking
-path: modules/optionals/networking/
-targetAccount: primary
-dataFiles:
-  - filePath: data/test.txt
-  - filePath: config/config.json
-```
-
 These files will be included in the module bundle and available to the module during deployment.
-
-## Best Practices for Local Development
-
-### Use a Development Environment
-
-Use a separate AWS account for development and testing to avoid affecting production resources.
-
-### Use Environment Variables
-
-Store account IDs and other sensitive information in environment variables rather than hardcoding them in manifests.
-
-### Test Changes Incrementally
-
-Make small changes and test them incrementally rather than making many changes at once.
-
-### Use Version Control
-
-Use version control to track changes to your modules and manifests.
-
-### Document Your Modules
-
-Document your modules with a comprehensive README.md that describes the module, its inputs, and its outputs.
-
-### Use Consistent Naming Conventions
-
-Use consistent naming conventions for parameters and outputs to make it easier to understand your modules.
-
-### Handle Errors Gracefully
-
-Include error handling in your deployspec commands to ensure that failures are reported clearly.
-
-## Troubleshooting
-
-### Missing AWS Credentials
-
-If you get an error about missing AWS credentials, make sure you have configured the AWS CLI with the appropriate credentials:
-
-```bash
-aws configure
-```
-
-### Missing AWS CDK Bootstrap
-
-If you get an error about missing AWS CDK bootstrap, make sure you have bootstrapped AWS CDK in the target account/region:
-
-```bash
-cdk bootstrap aws://ACCOUNT-NUMBER/REGION
-```
-
-### Missing Seed-Farmer Bootstrap
-
-If you get an error about missing Seed-Farmer bootstrap, make sure you have bootstrapped the toolchain and target accounts:
-
-```bash
-seedfarmer bootstrap toolchain --project myproject --trusted-principal arn:aws:iam::123456789012:role/Admin --as-target
-```
-
-### Module Deployment Failures
-
-If a module fails to deploy, check the AWS CodeBuild logs for more information. You can also check the AWS CloudFormation console for stack deployment failures.
 
 ## Conclusion
 
