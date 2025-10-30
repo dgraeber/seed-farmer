@@ -142,8 +142,6 @@ Seed-Farmer follows [GitOps](https://opengitops.dev/) best practices:
 - **Declarative configuration**: Infrastructure defined in manifest files
 - **Version control**: All configurations stored in Git repositories
 - **Automated deployment**: Changes trigger deployment pipelines
-- **Drift detection**: Compares desired state with actual deployment
-- **Rollback capability**: Version control enables easy rollbacks
 
 ## Scalability and Performance
 
@@ -151,7 +149,6 @@ Seed-Farmer follows [GitOps](https://opengitops.dev/) best practices:
 
 Seed-Farmer optimizes deployment performance through:
 
-- **Group-level parallelism**: Independent groups deploy simultaneously
 - **Module-level parallelism**: Modules within groups deploy concurrently
 - **Account-level parallelism**: Multi-account deployments run in parallel
 - **Configurable concurrency**: Adjustable parallelism per group

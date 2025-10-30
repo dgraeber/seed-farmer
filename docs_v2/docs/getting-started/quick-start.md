@@ -121,7 +121,7 @@ Now the deployment is ready for deployment.
 seedfarmer apply deployment.yaml
 ```
 
-Since this is the first deployment for the project `myproject`, SeedFarmer will add the necessary artifacts to support the project (a generic module role, the SeedKit, and a SeedFarmer Artifacts bucket).  These items are created once and reused by all deployments in the project.
+Since this is the first deployment for the project `myproject`, SeedFarmer will add the necessary artifacts to support the project (a generic [module role](../../concepts/architecture/#3-module-role), the [SeedKit](../../concepts/architecture/#3-module-role), and a [SeedFarmer Artifacts](../../concepts/architecture/#3-module-role) bucket).  These items are created once and reused by all deployments in the project.
 
 You should see somethign similar to:
 ```bash
