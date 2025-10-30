@@ -604,8 +604,6 @@ targetAccountMappings:
       - region: us-east-1
         default: true
       - region: us-west-2
-        parametersRegional:
-          backup-region: true
 ```
 
 ### Module Dependency Chain

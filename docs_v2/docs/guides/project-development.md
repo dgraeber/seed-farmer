@@ -21,7 +21,7 @@ A well-organized Seed-Farmer project follows this recommended structure:
 ```
 project-root/
 ├── seedfarmer.yaml           # Project configuration file
-├── .env                      # Environment variables (not committed)
+├── .env                      # Environment variables
 ├── README.md                 # Project documentation
 ├── manifests/                # Deployment and module manifests
 │   ├── deployment.yaml       # Main deployment manifest
@@ -51,11 +51,11 @@ project-root/
 Every Seed-Farmer project must have a `seedfarmer.yaml` file at the root and must the the project name defined:
 
 ```yaml
-project: my-data-platform
+project: myprojectname
 
 ```
 
-This file defines the project name, which is used throughout the deployment process for resource naming and organization.
+This file defines the project name, which is used throughout the deployment process for resource naming and organization.  It is also used as the reference point for all relative paths.
 
 - **project** (required) - defines the project name for all artifacts and deployments
 - **description** (optional) - a textual description of the project
@@ -70,10 +70,10 @@ Create a new project using the Seed-Farmer CLI:
 
 ```bash
 # Create a new project with a specific name
-seedfarmer init project --name my-data-platform
+seedfarmer init project --name myprojectname
 
 # Navigate to the project directory
-cd my-data-platform
+cd myprojectname
 ```
 
 This command creates the basic project structure with template files.
@@ -84,11 +84,11 @@ If you prefer to set up manually:
 
 ```bash
 # Create project directory
-mkdir my-data-platform
-cd my-data-platform
+mkdir myprojectname
+cd myprojectname
 
 # Create seedfarmer.yaml
-echo "project: my-data-platform" > seedfarmer.yaml
+echo "project: myprojectname" > seedfarmer.yaml
 
 # Create directory structure
 mkdir -p manifests modules data

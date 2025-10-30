@@ -165,7 +165,7 @@ Deployed Modules
 
 ```
 
-And to check if there are any module outputs, you can get that information (note, in the below, `jq` is used to parse the output since is it json...but is not necessary to use).
+And to check if there are any module outputs, you can get that information (note, in the below, [jq](https://github.com/jqlang/jq) is used to parse the output since is it json...but is not necessary to use).
 
 ```bash
 seedfarmer list allmodledata -d verysimple | jq .
