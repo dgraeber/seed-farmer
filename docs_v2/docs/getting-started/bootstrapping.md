@@ -58,7 +58,7 @@ For this guide, we will let the project name be `myproject`.
 ```bash
 seedfarmer bootstrap toolchain \
   --project myproject \
-  --trusted-principal arn:aws:iam::123456789012:role/Admin \
+  --trusted-principal arn:aws:iam::123456789012:role/DevOps \
   --as-target
 ```
 
@@ -67,7 +67,7 @@ This command:
 1. Sets up the toolchain account with the necessary IAM roles
 2. Also bootstraps the account as a target account (`--as-target`)
 3. Uses the project name `myproject`
-4. Trusts the `Admin` role to assume the toolchain role
+4. Trusts the `DevOps` role to assume the toolchain role
 
 ## Bootstrap Target Account
 
@@ -133,7 +133,7 @@ IAM paths must begin and end with a `/`. For example:
 ```bash
 seedfarmer bootstrap toolchain \
   --project myproject \
-  --trusted-principal arn:aws:iam::123456789012:role/Admin \
+  --trusted-principal arn:aws:iam::123456789012:role/DevOps \
   --role-prefix /myproject/ \
   --policy-prefix /myproject/
 ```

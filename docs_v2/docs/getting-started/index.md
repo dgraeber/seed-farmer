@@ -51,8 +51,8 @@ Once you have Seed-Farmer installed, the [Quick Start](quick-start.md) guide wil
 
 After completing the getting started guides, you'll have a basic understanding of how to use Seed-Farmer. From here, you can:
 
-- Learn more about the [core concepts](../concepts/index.md) behind Seed-Farmer
-- Explore the [guides](../guides/index.md) for common tasks
-- Refer to the [reference documentation](../reference/index.md) for detailed information on CLI commands, manifests, and module development
+- Learn more about the [Concepts](../concepts/index.md) behind Seed-Farmer
+- Explore the [Guides](../guides/index.md) for common tasks
+- Refer to the [Reference Documentation](../reference/index.md) for detailed information on CLI commands, manifests, and module development
 
 
