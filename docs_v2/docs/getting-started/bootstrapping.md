@@ -11,7 +11,11 @@ Seed-Farmer uses two types of accounts:
 
 You must have only one toolchain account bootstrapped and at least one target account bootstrapped. The account that is the toolchain account can also be bootstrapped as a target account.
 
+
 ## Bootstrap Toolchain Account
+
+_You must have completed the [Installation](installation.md)_
+
 
 The `seedfarmer bootstrap toolchain` command sets up the toolchain account with the necessary IAM roles and permissions.
 
@@ -34,6 +38,7 @@ seedfarmer bootstrap toolchain \
 
 - `--project` (`-p`): Project identifier
 - `--trusted-principal` (`-t`): ARN of principals trusted to assume the toolchain role (can be used multiple times)
+    - _The Trusted Principal is the role invoking the SeedFarmer CLI and can assume the toolchain role...up to 5 can be added_
 
 ### Optional Parameters
 
@@ -48,6 +53,7 @@ seedfarmer bootstrap toolchain \
 - `--policy-arn` (`-pa`): ARN of existing policy to attach to the target role (can be used multiple times)
 
 ### Example
+For this guide, we will let the project name be `myproject`.
 
 ```bash
 seedfarmer bootstrap toolchain \
@@ -97,6 +103,8 @@ seedfarmer bootstrap target \
 
 ### Example
 
+Continue to use the project name as `myproject`.
+
 ```bash
 seedfarmer bootstrap target \
   --project myproject \
@@ -141,19 +149,8 @@ The deployment role includes explicit deny policies for certain high-risk IAM ac
 - `iam:AttachGroupPolicy`
 - `iam:AttachUserPolicy`
 - `iam:CreatePolicyVersion`
-- And several others
 
 These restrictions help maintain security by preventing potential privilege escalation paths while still allowing the deployment role to perform its intended functions.
-
-## Prepping the Account/Region
-
-Seed-Farmer leverages AWS CDK v2, which must be bootstrapped in each account/region combination to be used for each target account:
-
-```bash
-cdk bootstrap aws://ACCOUNT-NUMBER/REGION
-```
-
-Replace `ACCOUNT-NUMBER` with your AWS account number and `REGION` with your AWS region.
 
 ## Seedkit Infrastructure
 
@@ -177,7 +174,7 @@ The following policy outlines the minimum required IAM permissions to execute `s
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "VisualEditor0",
+            "Sid": "CFNPolicySID",
             "Effect": "Allow",
             "Action": [
                 "cloudformation:CreateChangeSet",
@@ -192,7 +189,7 @@ The following policy outlines the minimum required IAM permissions to execute `s
             ]
         },
         {
-            "Sid": "VisualEditor1",
+            "Sid": "IAMPolicySID",
             "Effect": "Allow",
             "Action": [
                 "iam:GetRole",
@@ -202,7 +199,7 @@ The following policy outlines the minimum required IAM permissions to execute `s
                 "iam:DeleteRole",
                 "iam:PutRolePolicy"
             ],
-            "Resource": "*"
+            "Resource": "arn:aws:iam:::role/seedfarmer-*"
         }
     ]
 }
@@ -216,5 +213,5 @@ The following policy outlines the minimum required IAM permissions to execute `s
 After bootstrapping your accounts, you can:
 
 - Follow the [Quick Start](quick-start.md) guide to deploy your first project
-- Learn about [manifests](../reference/manifests.md) to define your deployments
-- Explore [module development](../guides/module-development.md) to create your own modules
+- Learn about [Manifests](../reference/manifests.md) to define your deployments
+- Explore [Module Development](../guides/module-development.md) to create your own modules

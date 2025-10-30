@@ -99,6 +99,6 @@ Run the [AWS CDK Bootstrap](https://docs.aws.amazon.com/cdk/v2/guide/bootstrappi
 
 Now that you have Seed-Farmer installed, you can:
 
-- Follow the [Quick Start](quick-start.md) guide to deploy your first project
 - Learn how to [Bootstrap](bootstrapping.md) your AWS accounts for Seed-Farmer
+- Follow the [Quick Start](quick-start.md) guide to deploy your first project
 - Explore the [Concepts](../concepts/index.md) behind Seed-Farmer

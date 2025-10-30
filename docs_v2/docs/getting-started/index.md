@@ -1,6 +1,6 @@
 # Getting Started with Seed-Farmer
 
-This section provides everything you need to get started with Seed-Farmer, from installation to your first deployment.
+This section provides instructions to get started with Seed-Farmer and be ready to deploy an application.
 
 SeedFarmer can run on local compute and on compute within a CI/CD pipeline -- the setup requirements are the same.
 
