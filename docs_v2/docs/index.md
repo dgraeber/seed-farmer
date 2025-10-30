@@ -32,7 +32,7 @@ Please see the [Concepts](concepts/index.md) page for an in-depth explanation.
 
 ## Getting Started
 
-To get started with Seed-Farmer, please see the [Getting Started](getting-started) Section which includes:
+To get started with Seed-Farmer, please see the [Getting Started](getting-started/index.md) Section which includes:
 
 - [Installation](getting-started/installation.md): Install Seed-Farmer and its dependencies
 - [Quick Start](getting-started/quick-start.md): Deploy your first project with Seed-Farmer

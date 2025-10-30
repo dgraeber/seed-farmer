@@ -6,13 +6,15 @@ This guide will walk you through the process of installing Seed-Farmer and its d
 
 Before installing Seed-Farmer, ensure you have the following prerequisites:
 
-- Python 3.10 or later
-- AWS CLI configured with appropriate credentials
-- AWS CDK (for CDK-based modules)
+- **Python >=3.11** - SeedFarmer runs in python
+- **AWS CLI** - For configuring credentials on compute
+- **AWS CDK and CDK Bootstrap** (recommended) - the majority of SeedFarmer [Public Modules](../modules/index.md) use AWS CDkv2
 
 ## Installing Seed-Farmer
 
-Seed-Farmer uses uv to install.  It is recommended to [install](https://docs.astral.sh/uv/getting-started/installation/) uv and use that as the primary installation tool. 
+SeedFarmer supports [uv](https://docs.astral.sh/uv/) and [pip](https://pypi.org/project/pip/) for installation for use.
+
+It is recommended to [install uv](https://docs.astral.sh/uv/getting-started/installation/) as the primary installation tool. 
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -24,27 +26,38 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 Install Seed-Farmer as a tool.
 
 ```bash
-uv tool install seed-farmer 
+## you can use your preferred version of python
+
+uv tool install --python 3.13 seed-farmer 
 
 ```
 You can pin to a particular version by referring to the version in the install ( see the [pypi release history](https://pypi.org/project/seed-farmer/#history) )
 
-### Using pip
+### Using pip 
 
-Install Seed-Farmer is using pip:
+Install Seed-Farmer using [pip](https://pypi.org/project/pip/)
 
 ```bash
-uv pip install seed-farmer
+python -m venv .venv
+source .venv/bin/activate
+pip install seed-farmer
 ```
 
 ### From Source
 
-You can also install Seed-Farmer from source:
+You can also install Seed-Farmer from source using your installation of choice:
 
 ```bash
 git clone https://github.com/awslabs/seed-farmer.git
 cd seed-farmer
+
+## Via Source Code with uv 
 uv pip install -e .
+
+## -- OR -- 
+
+## Via Source Code with pip 
+pip install -e .
 ```
 
 ## Verifying the Installation
@@ -59,7 +72,9 @@ This should display the version of Seed-Farmer that you have installed.
 
 ## Setting Up Your Environment
 
-### AWS Credentials
+### AWS CLI and Credentials
+
+Install the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 
 Seed-Farmer uses the AWS credentials configured in your environment. You can configure these using the AWS CLI:
 
@@ -77,24 +92,13 @@ export AWS_REGION=your-region
 
 ### AWS CDK
 
-If you're using CDK-based modules, you'll need to install the AWS CDK in each target account:
+Run the [AWS CDK Bootstrap](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) in each target account using the [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/getting-started.html).
 
-```bash
-npm install -g aws-cdk
-```
-
-And bootstrap your AWS environment:
-
-```bash
-cdk bootstrap aws://ACCOUNT-NUMBER/REGION
-```
-
-Replace `ACCOUNT-NUMBER` with your AWS account number and `REGION` with your AWS region.
 
 ## Next Steps
 
 Now that you have Seed-Farmer installed, you can:
 
 - Follow the [Quick Start](quick-start.md) guide to deploy your first project
-- Learn how to [bootstrap](bootstrapping.md) your AWS accounts for Seed-Farmer
-- Explore the [core concepts](../concepts/index.md) behind Seed-Farmer
+- Learn how to [Bootstrap](bootstrapping.md) your AWS accounts for Seed-Farmer
+- Explore the [Concepts](../concepts/index.md) behind Seed-Farmer
