@@ -14,7 +14,7 @@ Key features include:
 - **Flexible Parameterization**: Support for various parameter sources including environment variables, AWS SSM Parameter Store, and AWS Secrets Manager
 - **Security-Focused**: Least-privilege IAM roles and permissions boundaries
 - **Tooling Agnosticism**: Support for various IaC tools (CDK, CloudFormation, Terraform)
-- **GitOps Workflow**: Code-driven deployments with state management
+- **[GitOps](https://opengitops.dev/) Workflow**: Code-driven deployments with state management
 
 ## Concepts
 
@@ -32,7 +32,7 @@ Please see the [Concepts](concepts/index.md) page for an in-depth explanation.
 
 ## Getting Started
 
-To get started with Seed-Farmer, check out the following guides:
+To get started with Seed-Farmer, please see the [Getting Started](getting-started) Section which includes:
 
 - [Installation](getting-started/installation.md): Install Seed-Farmer and its dependencies
 - [Quick Start](getting-started/quick-start.md): Deploy your first project with Seed-Farmer

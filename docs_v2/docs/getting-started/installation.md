@@ -6,7 +6,7 @@ This guide will walk you through the process of installing Seed-Farmer and its d
 
 Before installing Seed-Farmer, ensure you have the following prerequisites:
 
-- Python 3.9 or later (preferably later)
+- Python 3.10 or later
 - AWS CLI configured with appropriate credentials
 - AWS CDK (for CDK-based modules)
 
