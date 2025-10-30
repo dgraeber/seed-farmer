@@ -87,8 +87,8 @@ nav:
   - Getting Started:
     - getting-started/index.md
     - Installation: getting-started/installation.md
-    - Quick Start: getting-started/quick-start.md
     - Bootstrapping: getting-started/bootstrapping.md
+    - Quick Start: getting-started/quick-start.md
   - Concepts:
     - concepts/index.md
     - Architecture: concepts/architecture.md

@@ -17,24 +17,26 @@ When you run `seedfarmer apply`, Seed-Farmer orchestrates deployments through AW
 ### 1. Bundle Creation
 
 Seed-Farmer creates a deployment bundle containing:
-- Your module's source code
-- Data files (if specified)
-- Project configuration (`seedfarmer.yaml`)
-- Support scripts for mirrors and Docker credentials
+
+  - Your module's source code
+  - Data files (if specified)
+  - Project configuration (`seedfarmer.yaml`)
+  - Support scripts for mirrors and Docker credentials
 
 ### 2. CodeBuild Project Execution
 
 For each module, Seed-Farmer:
+
 - Uploads the bundle to S3
 - Starts a CodeBuild project in the target account
 - Executes your module's `deployspec.yaml` phases
 - Captures outputs and metadata
 
-### 3. Environment Setup
+### 3. CodeBuild Setup
 
 CodeBuild environments are automatically configured with:
 
-- Python virtual environment with seed-farmer CLI
+- Python virtual environment
 - AWS credentials for the target account/region
 - Module parameters as environment variables
 - Docker registry authentication
@@ -42,14 +44,6 @@ CodeBuild environments are automatically configured with:
 
 ## AWS CodeBuild Integration
 
-### Seedkit Infrastructure
-
-Seed-Farmer deploys "seedkit" infrastructure in each target account/region:
-
-- **CodeBuild Project**: Executes module deployments
-- **IAM Roles**: Deployment roles with appropriate permissions
-- **S3 Bucket**: Stores deployment bundles and artifacts
-- **CloudWatch Logs**: Captures deployment execution logs
 
 ### Build Images
 
@@ -312,50 +306,3 @@ Seed-Farmer automatically captures build information:
 
 - CodeBuild build URL
 - CloudWatch log stream path
-- Build duration and status
-- Deployment timestamps
-
-### Common Issues
-
-**Build Timeouts**:
-
-- Default timeout: 120 minutes for deploy, 90 minutes for destroy
-- Increase compute type for resource-intensive deployments
-- Optimize deployspec commands for efficiency
-
-**Permission Errors**:
-
-- Check module-specific IAM permissions in `modulestack.yaml`
-- Verify deployment role has necessary permissions
-- Review permissions boundary configuration
-
-**Network Issues**:
-
-- Configure VPC settings for private resource access
-- Ensure security groups allow required traffic
-- Check NAT gateway configuration for internet access
-
-## Best Practices
-
-### Performance Optimization
-
-- **Choose appropriate compute types** based on module requirements
-- **Use package mirrors** to reduce download times
-- **Cache dependencies** when possible in your deployspec
-- **Parallelize operations** within modules where safe
-
-### Security
-
-- **Use least-privilege IAM roles** in modulestack.yaml
-- **Store sensitive data** in AWS Secrets Manager or SSM Parameter Store
-- **Configure permissions boundaries** to limit deployment role capabilities
-- **Use VPC deployment** for modules requiring private network access
-
-### Reliability
-
-- **Include error handling** in deployspec commands
-- **Use idempotent operations** that can be safely retried
-- **Test modules individually** before integration
-- **Monitor CloudWatch logs** for deployment issues
-
-For detailed information about deployspec structure and commands, see the [Deployspec Reference](../reference/deployspec.md).
