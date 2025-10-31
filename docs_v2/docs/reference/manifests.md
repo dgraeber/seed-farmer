@@ -26,9 +26,8 @@ The deployment manifest serves as the **master configuration** for your entire d
 
 1. **Multi-Account Orchestration**: Defines which AWS accounts and regions to deploy to
 2. **Deployment Sequencing**: Controls the order in which groups of modules are deployed
-3. **Security Configuration**: Sets up IAM roles, permissions boundaries, and security policies
-4. **Shared Parameters**: Provides common configuration values that multiple modules can reference
-5. **Network Configuration**: Defines VPC settings for CodeBuild execution environments
+3. **Shared Parameters**: Provides common configuration values that multiple modules can reference
+4. **Network Configuration**: Defines VPC settings for CodeBuild execution environments
 
 ### Structure and Example
 
@@ -43,7 +42,7 @@ groups:
     path: manifests/networking-modules.yaml
   - name: compute
     path: manifests/compute-modules.yaml
-    concurrency: 4  # Optional: limit parallel execution to 4 modules
+    concurrency: 4  # Optional: limit parallel execution
   - name: applications
     path: manifests/app-modules.yaml
 
@@ -556,11 +555,11 @@ forceDependencyRedeploy: true
 1. **Use descriptive module names** that clearly indicate the module's purpose
 2. **Leverage module dependencies** instead of hardcoding resource references
 3. **Use parameter sources appropriately**:
-   - Static values for configuration that rarely changes
-   - Environment variables for deployment-specific values
-   - SSM parameters for shared configuration
-   - Secrets Manager for sensitive data
-   - Module metadata for resource dependencies
+      - Static values for configuration that rarely changes
+      - Environment variables for deployment-specific values
+      - SSM parameters for shared configuration
+      - Secrets Manager for sensitive data
+      - Module metadata for resource dependencies
 4. **Document parameter requirements** in your module's README
 5. **Use consistent naming conventions** for parameters across related modules
 
@@ -605,31 +604,6 @@ targetAccountMappings:
         default: true
       - region: us-west-2
 ```
-
-### Module Dependency Chain
-
-```yaml
-# Database module (no dependencies)
-name: postgres-database
-path: modules/database/postgres/
-parameters:
-  - name: instance-class
-    value: db.t3.medium
-
----
-# Application module (depends on database)
-name: web-application  
-path: modules/app/webapp/
-parameters:
-  - name: database-endpoint
-    valueFrom:
-      moduleMetadata:
-        group: data
-        name: postgres-database
-        key: DatabaseEndpoint
-```
-
-This structure ensures that the database is created before the application that depends on it, and the application automatically receives the correct database endpoint.
 
 
 ## Full Definition - Deployment Manifest 

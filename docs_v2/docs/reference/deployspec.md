@@ -123,7 +123,7 @@ Seed-Farmer converts parameter names to environment variables using these transf
 
 ### System Environment Variables
 
-Seed-Farmer also provides system-level information as environment variables:
+Seed-Farmer also provides system-level information as environment variables within the deploy process:
 
 ```bash
 SEEDFARMER_PROJECT_NAME=myapp
@@ -156,29 +156,6 @@ deploy:
             --parameter-overrides \
               VpcId=$SEEDFARMER_PARAMETER_VPC_ID \
               InstanceType=$SEEDFARMER_PARAMETER_INSTANCE_TYPE
-```
-
-### Advanced Parameter Usage
-
-```yaml
-deploy:
-  phases:
-    pre_build:
-      commands:
-        # Validate required parameters
-        - |
-          if [ -z "$SEEDFARMER_PARAMETER_VPC_ID" ]; then
-            echo "ERROR: VPC ID parameter is required"
-            exit 1
-          fi
-        
-        # Transform parameters for use
-        - export SUBNET_IDS=$(echo $SEEDFARMER_PARAMETER_SUBNET_IDS | tr ',' ' ')
-        
-    build:
-      commands:
-        # Use parameters in complex commands
-        - cdk deploy --require-approval never --progress events --app "python app.py" --outputs-file ./cdk-exports.json
 ```
 
 ### Working with JSON Parameters
@@ -248,7 +225,7 @@ There are several ways to export metadata from your module:
 
 ### Method 1: Using seedfarmer metadata Commands (Recommended)
 
-The `seedfarmer metadata` commands automatically handle the metadata file creation and management:
+The [seedfarmer metadata](./cli-commands.md#metadata-commands) commands automatically handle the metadata file creation and management:
 
 ```yaml
 deploy:
@@ -298,52 +275,6 @@ deploy:
 
 !!! warning "Use with caution"
     Seed-Farmer provides commands to automate the addition of data to the output and it is recommended to use them.  
-
-### Metadata CLI Commands
-
-Seed-Farmer provides helper commands for metadata management:
-
-```bash
-# Convert CDK outputs to Seed-Farmer metadata format
-seedfarmer metadata convert
-
-# Add key-value metadata
-seedfarmer metadata add -k MyKey -v MyValue
-
-# Add JSON metadata
-seedfarmer metadata add -j '{"key": "value"}'
-
-# Get the full module deployment name
-seedfarmer metadata depmod
-
-# Get parameter values
-seedfarmer metadata paramvalue -s SEEDFARMER_DEPLOYMENT_NAME
-```
-
-#### seedfarmer metadata convert
-
-This command is specifically designed for CDK deployments and is **REQUIRED** if you want to persist metadata for other modules to consume. It automatically extracts outputs from CDK and converts them to Seed-Farmer metadata format.
-
-**Important**: You MUST use `seedfarmer metadata convert` to persist metadata. Simply creating CDK outputs is not sufficient - the convert command is what actually stores the metadata in the Seed-Farmer system.
-
-```yaml
-deploy:
-  phases:
-    build:
-      commands:
-        # Deploy CDK with outputs file
-        - cdk deploy --require-approval never --progress events --app "python app.py" --outputs-file ./cdk-exports.json
-    post_build:
-      commands:
-        # REQUIRED: Convert CDK outputs to metadata (looks for the module's specific outputs)
-        - seedfarmer metadata convert
-        
-        # Or specify a different file
-        - seedfarmer metadata convert -f my-custom-outputs.json
-        
-        # Or use jq to extract specific data
-        - seedfarmer metadata convert -jq '.MyStack.metadata'
-```
 
 #### CDK Output Structure for Metadata
 
@@ -399,28 +330,8 @@ The `seedfarmer metadata convert` command expects the CDK outputs file to have t
 - The `metadata` field must contain a **JSON string** (not a JSON object)
 - The JSON string contains your actual metadata values as a serialized JSON object
 - The `Stack.to_json_string()` method in CDK automatically creates this JSON string format
-- The `seedfarmer metadata convert` command extracts this JSON string and parses it to store the metadata
 
-#### seedfarmer metadata add
 
-Add individual key-value pairs or JSON objects to the metadata:
-
-```yaml
-deploy:
-  phases:
-    post_build:
-      commands:
-        # Add simple key-value pairs
-        - seedfarmer metadata add -k VpcId -v $VPC_ID
-        - seedfarmer metadata add -k Region -v $AWS_DEFAULT_REGION
-        
-        # Add complex JSON data
-        - seedfarmer metadata add -j '{"Subnets": {"Public": ["subnet-123"], "Private": ["subnet-456"]}}'
-        
-        # Add data from command output
-        - ENDPOINT=$(aws rds describe-db-clusters --query 'DBClusters[0].Endpoint' --output text)
-        - seedfarmer metadata add -k DatabaseEndpoint -v $ENDPOINT
-```
 
 ### Important Metadata Guidelines
 
