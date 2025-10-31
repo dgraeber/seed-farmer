@@ -223,7 +223,7 @@ When your deployspec runs, Seed-Farmer automatically creates a metadata file tha
 
 There are several ways to export metadata from your module:
 
-### Method 1: Using seedfarmer metadata Commands (Recommended)
+### Method 1: Using SeedFarmer Metadata CLI Commands (Recommended)
 
 The [seedfarmer metadata](./cli-commands.md#metadata-commands) commands automatically handle the metadata file creation and management:
 
@@ -251,26 +251,6 @@ deploy:
         # For generic modules
         - export SEEDFARMER_MODULE_METADATA='{"VpcId": "vpc-12345678", "SubnetIds": ["subnet-123", "subnet-456"]}'
  
-```
-
-### Method 3: Writing to the Metadata File Directly
-
-Advanced users can write directly to the metadata file:
-
-```yaml
-deploy:
-  phases:
-    post_build:
-      commands:
-        # Create metadata JSON
-        - |
-          cat > module/$SEEDFARMER_MODULE_METADATA << EOF
-          {
-            "VpcId": "vpc-12345678",
-            "DatabaseEndpoint": "mydb.cluster-xyz.us-east-1.rds.amazonaws.com",
-            "SubnetIds": ["subnet-123", "subnet-456"]
-          }
-          EOF
 ```
 
 !!! warning "Use with caution"
@@ -326,12 +306,10 @@ The `seedfarmer metadata convert` command expects the CDK outputs file to have t
 ```
 
 **Critical Requirements:**
-- `project-deployment-module` is the full module deployment name (format: `{project}-{deployment}-{module}`)
-- The `metadata` field must contain a **JSON string** (not a JSON object)
-- The JSON string contains your actual metadata values as a serialized JSON object
-- The `Stack.to_json_string()` method in CDK automatically creates this JSON string format
 
-
+  - `project-deployment-module` is the full module deployment name (format: `{project}-{deployment}-{module}`)
+  - The `metadata` field must contain a **JSON string** (not a JSON object)
+  - The JSON string contains your actual metadata values as a serialized JSON object
 
 ### Important Metadata Guidelines
 
@@ -619,38 +597,11 @@ publishGenericEnvVariables: true
 4. **Set default values** when appropriate to make modules more flexible
 5. **Document parameter requirements** in your module's README
 
-### Error Handling
-
-```yaml
-deploy:
-  phases:
-    pre_build:
-      commands:
-        # Validate required parameters
-        - |
-          if [ -z "$SEEDFARMER_PARAMETER_VPC_ID" ]; then
-            echo "ERROR: VPC ID is required but not provided"
-            exit 1
-          fi
-        
-        # Validate parameter format
-        - |
-          if [[ ! $SEEDFARMER_PARAMETER_VPC_ID =~ ^vpc-[a-f0-9]{8,17}$ ]]; then
-            echo "ERROR: Invalid VPC ID format: $SEEDFARMER_PARAMETER_VPC_ID"
-            exit 1
-          fi
-    build:
-      commands:
-        - cdk deploy --require-approval never --progress events --app "python app.py" --outputs-file ./cdk-exports.json
-        - echo "Deployment successful"
-```
-
 ### Metadata Export
 
-1. **Always export relevant outputs** that other modules might need
-2. **Use consistent naming conventions** for exported metadata
-3. **Include both simple values and complex objects** as needed
-4. **Document exported metadata** in your module's README
+1. **Use consistent naming conventions** for exported metadata
+2. **Include both simple values and complex objects** as needed
+3. **Document exported metadata** in your module's README
 
 ### Security Considerations
 
