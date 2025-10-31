@@ -103,7 +103,6 @@ Modules share references of deployed artifacts via a metadata management system:
 - **Storage**: Metadata stored in [AWS SSM Parameter Store](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html),
 - **Versioning**: Metadata tracked per deployment for consistency
 
-
 ### State Management
 
 Seed-Farmer maintains deployment state through:
@@ -145,7 +144,7 @@ Seed-Farmer follows [GitOps](https://opengitops.dev/) best practices:
 
 ### Parallel Execution
 
-Seed-Farmer optimizes deployment performance by parallelizing grouped module deployment.  Each module deployment execution is independent: failure of one module within the group does not impact the other modules in that group...but after all modules within the group complete, SeedFarmer halts deployment. 
+Seed-Farmer optimizes deployment performance by parallelizing grouped module deployment.  Each module deployment execution is independent: failure of one module within the group does not impact the other modules in that group...but after all modules within the group complete, SeedFarmer halts deployment.
 
 - **Module-level parallelism**: Modules within groups deploy concurrently
 - **Account-level parallelism**: Multi-account deployments run in parallel

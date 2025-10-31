@@ -18,7 +18,7 @@ A Seed-Farmer project is a collection of Infrastructure as Code (IaC) modules or
 
 A well-organized Seed-Farmer project follows this recommended structure:
 
-```
+```bash
 project-root/
 ├── seedfarmer.yaml           # Project configuration file
 ├── .env                      # Environment variables

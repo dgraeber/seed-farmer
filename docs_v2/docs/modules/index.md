@@ -5,6 +5,7 @@ Seed-Farmer provides access to a comprehensive library of pre-built, reusable in
 ## How to Use Public Modules
 
 ### Git Path References
+
 You can reference modules directly in your deployment manifests using Git paths. Seed-Farmer will automatically fetch the code during deployment:
 
 ```yaml
@@ -14,6 +15,7 @@ targetAccount: primary
 ```
 
 ### Local References
+
 You can also clone the repository and reference modules from your local filesystem:
 
 ```yaml
@@ -25,11 +27,13 @@ targetAccount: primary
 ## Available Module Collections
 
 ### [IDF Modules](idf-modules/index.md)
+
 The **Industry Data Framework (IDF)** modules provide foundational infrastructure components for data processing and analytics solutions. These modules cover networking, compute, storage, databases, and orchestration services.
 
 **Key Categories**: Compute, Database, Network, Storage, Orchestration, Integration
 
 ### [AIOps Modules](aiops-modules/index.md)
+
 The **Artificial Intelligence Operations (AIOps)** modules provide specialized components for AI/ML workloads, including SageMaker services, MLflow, Ray clusters, and example implementations.
 
 **Key Categories**: SageMaker, MLflow, EKS, Agents, Examples, FMOps

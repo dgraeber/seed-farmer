@@ -11,49 +11,23 @@ Seed-Farmer uses two types of accounts:
 
 You must have only one toolchain account bootstrapped and at least one target account bootstrapped. The account that is the toolchain account can also be bootstrapped as a target account.
 
-
 ## Bootstrap Toolchain Account
 
-_You must have completed the [Installation](installation.md)_
+*You must have completed the [Installation](installation.md)*
 
+Please see [Bootstrapping Commands](../reference/cli-commands.md/#bootstrap-commands) or run the `--help` flag for all options.
 
-The `seedfarmer bootstrap toolchain` command sets up the toolchain account with the necessary IAM roles and permissions.
+The `seedfarmer bootstrap toolchain` command sets up the toolchain account with the necessary IAM roles and permissions.  
 
 ```bash
 seedfarmer bootstrap toolchain \
   --project PROJECT_NAME \
   --trusted-principal PRINCIPAL_ARN \
-  [--permissions-boundary BOUNDARY_ARN] \
-  [--as-target] \
-  [--synth] \
-  [--profile PROFILE] \
-  [--region REGION] \
-  [--qualifier QUALIFIER] \
-  [--role-prefix ROLE_PREFIX] \
-  [--policy-prefix POLICY_PREFIX] \
-  [--policy-arn POLICY_ARN]
 ```
 
-### Required Parameters
-
-- `--project` (`-p`): Project identifier
-- `--trusted-principal` (`-t`): ARN of principals trusted to assume the toolchain role (can be used multiple times)
-    - _The Trusted Principal is the role invoking the SeedFarmer CLI and can assume the toolchain role...up to 5 can be added_
-
-### Optional Parameters
-
-- `--permissions-boundary` (`-b`): ARN of a managed policy to set as the permissions boundary on the toolchain role
-- `--as-target`: Also bootstrap the account as a target account
-- `--synth`: Synthesize a CloudFormation template only (do not deploy)
-- `--profile`: AWS profile to use
-- `--region`: AWS region to use
-- `--qualifier`: A qualifier to append to the toolchain role (alpha-numeric, max 6 characters)
-- `--role-prefix`: An IAM path prefix to use with the Seed-Farmer roles
-- `--policy-prefix`: An IAM path prefix to use with the Seed-Farmer policies
-- `--policy-arn` (`-pa`): ARN of existing policy to attach to the target role (can be used multiple times)
-
 ### Example
-For this guide, we will let the project name be `myproject`.
+
+For this guide, we will let the project name be `myproject` and use an arbitrary ARN:
 
 ```bash
 seedfarmer bootstrap toolchain \
@@ -76,30 +50,8 @@ The `seedfarmer bootstrap target` command sets up a target account with the nece
 ```bash
 seedfarmer bootstrap target \
   --project PROJECT_NAME \
-  --toolchain-account ACCOUNT_ID \
-  [--permissions-boundary BOUNDARY_ARN] \
-  [--synth] \
-  [--profile PROFILE] \
-  [--region REGION] \
-  [--qualifier QUALIFIER] \
-  [--role-prefix ROLE_PREFIX] \
-  [--policy-arn POLICY_ARN]
+  --toolchain-account ACCOUNT_ID
 ```
-
-### Required Parameters
-
-- `--project` (`-p`): Project identifier
-- `--toolchain-account` (`-t`): Account ID of the toolchain account trusted to assume the target account's deployment role
-
-### Optional Parameters
-
-- `--permissions-boundary` (`-b`): ARN of a managed policy to set as the permissions boundary on the target role
-- `--synth`: Synthesize a CloudFormation template only (do not deploy)
-- `--profile`: AWS profile to use
-- `--region`: AWS region to use
-- `--qualifier`: A qualifier to append to the target role (alpha-numeric, max 6 characters)
-- `--role-prefix`: An IAM path prefix to use with the Seed-Farmer roles
-- `--policy-arn` (`-pa`): ARN of existing policy to attach to the target role (can be used multiple times)
 
 ### Example
 

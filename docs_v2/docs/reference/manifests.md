@@ -68,6 +68,7 @@ targetAccountMappings:
 ### Critical Fields Explained
 
 #### Groups
+
 Groups define **deployment phases**. Modules within a group deploy in parallel, but groups deploy sequentially:
 
 ```yaml
@@ -81,6 +82,7 @@ groups:
 ```
 
 #### Target Account Mappings
+
 This section defines **where** your modules will be deployed:
 
 ```yaml
@@ -147,13 +149,15 @@ parameters:
 ### Critical Fields Explained
 
 #### Path
+
 The path element tells Seed-Farmer where to fetch the module code in order to package it for deployment. Currently modules can be sourced from:
-    
-  - Local Filesystem
-  - Git Repositories
-  - Archives (zip and tar via HTTPS)
+
+- Local Filesystem
+- Git Repositories
+- Archives (zip and tar via HTTPS)
 
 These are all valid paths:
+
 ```yaml
 path: module/module-name
 
@@ -165,14 +169,11 @@ path: archive::https://myhostedurl.com/allmymodules.zip?module=modules/network/c
 
 ```
 
-
-
-!!! info "Module Sourcing "
-
+!!! info "Module Sourcing"
     Please see [Module Sourcing](conventions.md/#module-sourcing) for details
 
-
 #### Module Dependencies
+
 Modules can reference outputs from other modules using `moduleMetadata`:
 
 ```yaml
@@ -186,6 +187,7 @@ parameters:
 ```
 
 #### Parameter Sources
+
 Modules can get configuration from multiple sources:
 
 ```yaml
@@ -252,6 +254,7 @@ When Seed-Farmer processes parameters, it converts them into environment variabl
 **This is critically important**: Seed-Farmer transforms parameter names into environment variables using a specific naming convention.
 
 #### Generic Modules (Default)
+
 Parameters use the `SEEDFARMER_PARAMETER_` prefix:
 
 ```yaml
@@ -266,6 +269,7 @@ parameters:
 ```
 
 These become:
+
 ```bash
 SEEDFARMER_PARAMETER_VPC_ID=vpc-12345678
 SEEDFARMER_PARAMETER_INSTANCE_TYPE=t3.medium
@@ -273,6 +277,7 @@ SEEDFARMER_PARAMETER_SOME_DATABASE_NAME=myapp-db
 ```
 
 #### Project-Specific Modules
+
 Project-specific modules are a legacy feature that is now **strongly discouraged**. It is recommended to always create generic modules to avoid dependency on project naming. This feature is maintained for backward compatibility only.
 
 When `publishGenericEnvVariables: false` is set in the deployspec, parameters are prefixed with your project name using `<PROJECT_NAME>_PARAMETER_<PARAMETER_KEY>` format:
@@ -282,13 +287,10 @@ MYAPP_PARAMETER_VPC_ID=vpc-12345678
 MYAPP_PARAMETER_INSTANCE_TYPE=t3.medium
 MYAPP_PARAMETER_SOME_DATABASE_NAME=myapp-db
 ```
+
 !!! warning "Setting publishGenericEnvVariables to false"
     Changing publishGenericEnvVariables to false will make your module brittle as it can ONLY be used with projects that have the same name.
-    This is defaulted to true but is available only for backward compatibility.  
-    
-    Do not set this to false. 
-            
-
+    This is defaulted to true but is available only for backward compatibility. Do not set this to false.
 
 #### Naming Transformation Rules
 
@@ -326,6 +328,7 @@ deploy:
 Seed-Farmer also provides system-level environment variables:
 
 #### Generic Modules (Default)
+
 ```bash
 SEEDFARMER_PROJECT_NAME=myapp
 SEEDFARMER_DEPLOYMENT_NAME=production  
@@ -333,12 +336,14 @@ SEEDFARMER_MODULE_NAME=vpc-network
 SEEDFARMER_GROUP_NAME=networking
 ```
 
-
 ## Parameter Referencing in Manifests
+
 The module manifests allow for custom configuration via the parameters.  Parameters can be referenced in any of the following defined manners.
 
 ### User Defined
+
 These are simple key/value pairs passed in as strings.
+
 ```yaml
 name: metadata-storage
 path: modules/core/metadata-storage/
@@ -355,7 +360,8 @@ parameters:
 
 SeedFarmer supports using [Dotenv](https://github.com/theskumar/python-dotenv) for dynamic replacement. When a file named `.env` is placed at the project root (where seedfarmer.yaml resides), any value in a manifest with a key of envVariable will be matched and replaced with the corresponding environment variable. You can pass in overriding .env files by using the `--env-file` on CLI command invocation.
 
-SeedFarmer supports passing multiple `.env`, by using `--env-file` where subsequent files will override duplicate values. 
+SeedFarmer supports passing multiple `.env`, by using `--env-file` where subsequent files will override duplicate values.
+
 ```yaml
 name: opensearch
 path: modules/core/opensearch/
@@ -366,10 +372,7 @@ parameters:
 ```
 
 !!! info "Global Replacement in Manifests"
-    Seed-Farmer does support global dynamic replacement of values in the manifests.
-
-    Please see [Global Overrides](conventions.md/#global-replace-in-manifests)
-
+    Seed-Farmer does support global dynamic replacement of values in the manifests. Please see [Global Overrides](conventions.md/#global-replace-in-manifests)
 
 ### Module Metadata
 
@@ -387,8 +390,8 @@ parameters:
         key: VpcId
 ```
 
-
 ### AWS SSM Parameter
+
 When leveraging an SSM Parameter, Seed-Farmer can populate an AWS CodeBuild environment parameter as a `PARAMETER_STORE` type for reference in your module.
 AWS Codebuild manages fetching the value.
 
@@ -400,11 +403,12 @@ parameters:
     valueFrom:
       parameterStore: my-vpc-id
 ```
+
 !!! warning "Limited to Remote Deploy"
       This can only be used with Remote Deployments, not Local Deployments
 
-
 ### AWS Secrets Manager
+
 When leveraging an AWS Secret, Seed-Farmer can populate an AWS CodeBuild environment parameter as a `SECRETS_MANAGER` type for reference in your module.
 This is the recommended means to pass secured info to your module as AWS Codebuild brokers the retrieval.  No information is exposed in clear-text.
 
@@ -416,9 +420,9 @@ parameters:
     valueFrom:
       secretsManager: my-secret-vpc-id
 ```
+
 !!! warning "Limited to Remote Deploy"
       This can only be used with Remote Deployments, not Local Deployments
-
 
 ## Working with Data Files
 
@@ -444,7 +448,7 @@ parameters:
 
 Data files are specified relative to your project root and are bundled with the module code during deployment:
 
-```
+```bash
 project-root/
 ├── modules/
 │   └── applications/
@@ -499,7 +503,6 @@ deploy:
 - **Templates**: Kubernetes manifests, CloudFormation templates, configuration templates
 - **Certificates**: SSL certificates, CA certificates (though AWS Certificate Manager is preferred)
 - **Static assets**: Small static files needed by the deployed infrastructure
-
 
 ## Advanced Configuration
 
@@ -605,8 +608,7 @@ targetAccountMappings:
       - region: us-west-2
 ```
 
-
-## Full Definition - Deployment Manifest 
+## Full Definition - Deployment Manifest
 
 This definition of a deployment manifest is relatively extensive compared to the module manifests.  The following represents a look-up of the currently available definitions.
 
@@ -690,13 +692,9 @@ targetAccountMappings:
 ```
 
 !!! info "Deployment Manifest Fields"
-    NOTE: Not all fields are required
-
-    NOTE: not all fields can be used simultaneously!  
-
+    NOTE: Not all fields are required and not all fields can be used simultaneously!  
 
 ## Full Definition - Module Manifest
-
 
 ```yaml
 name: networking
@@ -733,4 +731,3 @@ dataFiles:
   - filePath: archive::https://github.com/awslabs/idf-modules/archive/refs/tags/v1.6.0.tar.gz?module=modules/storage/buckets/deployspec.yaml ## Can pull a tar ot zip archive over HTTPS
 
 ```
-

@@ -2,7 +2,6 @@
 
 This section provides how-to guides for common tasks with Seed-Farmer. These guides are designed to help you accomplish specific goals and solve common problems.
 
-
 ## Project Development
 
 The [Project Development](project-development.md) guide covers how to structure and organize Seed-Farmer projects. It includes best practices for project organization, managing multi-environment deployments, working with dependencies between modules, and using environment variables and remote modules effectively.
@@ -18,8 +17,6 @@ The [Local Deployments](local-deployments.md) guide explains how to deploy Seed-
 ## Remote Deployments
 
 The [Remote Deployments](remote-deployments.md) guide covers deploying Seed-Farmer projects using AWS CodeBuild in the cloud. It explains how Seed-Farmer leverages the Seedkit for remote deployments, working with different CodeBuild images, image overrides, and the deployment process in AWS environments.
-
-
 
 ## Common Tasks
 

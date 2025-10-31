@@ -51,26 +51,29 @@ Seed-Farmer implements a comprehensive **least-privilege security model** with m
 ### Role Hierarchy
 
 #### 1. Toolchain Role
+
 - **Location**: Toolchain account
 - **Purpose**: Orchestrates deployments and manages metadata
-- **Permissions**: 
-    - Read/write deployment metadata in AWS Systems Manager
-    - Assume deployment roles in target accounts
-    - Manage project-level resources
+- **Permissions**:
+  - Read/write deployment metadata in AWS Systems Manager
+  - Assume deployment roles in target accounts
+  - Manage project-level resources
 - **Trust Policy**: Trusted by specified principals (users, CI/CD systems)
 
 #### 2. Deployment Role
+
 - **Location**: Each target account
 - **Purpose**: Manages deployments within a specific account
 - **Permissions**:
-    - Create and manage CodeBuild projects (seedkit)
-    - Manage S3 buckets for deployment artifacts
-    - Create and manage module-specific IAM roles
-    - Read/write access to AWS Systems Manager for module metadata
-    - Access to AWS Systems Manager Parameter Store for state management
+  - Create and manage CodeBuild projects (seedkit)
+  - Manage S3 buckets for deployment artifacts
+  - Create and manage module-specific IAM roles
+  - Read/write access to AWS Systems Manager for module metadata
+  - Access to AWS Systems Manager Parameter Store for state management
 - **Trust Policy**: Trusted by the toolchain role
 
 #### 3. Module Role
+
 - **Location**: Target account (per module)
 - **Purpose**: Execute specific module deployments
 - **Permissions**: Module-specific permissions defined in `modulestack.yaml`
@@ -136,22 +139,24 @@ For detailed information about multi-account configuration, role setup, security
 Seed-Farmer supports two execution models to accommodate different use cases:
 
 #### Remote Deployments (Production)
+
 - **Execution Environment**: AWS CodeBuild
 - **Use Cases**: Production deployments, CI/CD pipelines
-- **Benefits**: 
-    - Scalable and reliable
-    - Complete audit trail
-    - VPC and network isolation
-    - No local dependencies
+- **Benefits**:
+  - Scalable and reliable
+  - Complete audit trail
+  - VPC and network isolation
+  - No local dependencies
 
 #### Local Deployments (Development)
+
 - **Execution Environment**: Local Docker containers
 - **Use Cases**: Development, testing, debugging
 - **Benefits**:
-    - Fast feedback loop
-    - No AWS charges for compute
-    - Real-time output
-    - Offline development capability
+  - Fast feedback loop
+  - No AWS charges for compute
+  - Real-time output
+  - Offline development capability
 
 ### Parallel Execution
 
@@ -196,7 +201,6 @@ graph TD
 
 ### Dependency Management
 
-
 The groups are deployed as a **Directed Acyclic Graph (DAG)** and the module dependency relationships are aligned to the groups of the DAG.
 
 Here's a basic DAG structure showing a possible workflow pattern and module dependency relationships:
@@ -233,7 +237,6 @@ When a module changes (is redeployed), downstream modules that are dependent on 
 !!! warning
     This is an indiscriminate feature that is not granular enough to detect what is causing a redeploy, only that one needs to occur. Any change to a module will trigger a redeploy of that module and all downstream modules that depend on it, even if the underlying logic or artifact has not changed.
 
-
 ## Seedkit Infrastructure
 
 The **seedkit** is the foundational infrastructure that Seed-Farmer deploys in each target account and region to enable module deployments. It provides the necessary AWS resources for both local and remote deployments.
@@ -251,23 +254,27 @@ The seedkit is a CloudFormation stack that contains the core infrastructure comp
 ### Seedkit Components
 
 #### CodeBuild Project
+
 - **Purpose**: Executes module deployspec commands in isolated environments
 - **Configuration**: Automatically configured with appropriate compute resources and runtime
 - **Networking**: Can be configured to run in VPC for private resource access
 - **Logging**: All execution logged to CloudWatch for auditability
 
 #### S3 Artifact Bucket
+
 - **Purpose**: Stores module bundles, deployment artifacts, and build outputs
 - **Naming**: `seedfarmer-<project>-<account>-<region>-<hash>`
 - **Security**: Encrypted at rest, access controlled via IAM roles
 - **Lifecycle**: Configurable retention policies for cost optimization
 
 #### IAM Service Roles
+
 - **CodeBuild Service Role**: Allows CodeBuild to access necessary AWS services
 - **Module Deployment Roles**: Created per-module with least-privilege permissions
 - **Cross-Account Trust**: Enables secure cross-account deployments
 
 #### CloudWatch Logs
+
 - **Log Groups**: `/aws/codebuild/<project-name>`
 - **Retention**: Configurable (default: 30 days)
 - **Access**: Controlled via IAM for security and compliance
@@ -275,6 +282,7 @@ The seedkit is a CloudFormation stack that contains the core infrastructure comp
 ### Seedkit Deployment
 
 #### Automatic Deployment
+
 Seed-Farmer automatically deploys the seedkit during the first deployment to each account/region:
 
 1. **Detection**: Checks for existing seedkit stack in target account/region
@@ -283,6 +291,7 @@ Seed-Farmer automatically deploys the seedkit during the first deployment to eac
 4. **Validation**: Verifies all components are properly configured
 
 #### Manual Management
+
 You can also manage the seedkit manually using Seed-Farmer CLI commands:
 
 ```bash
@@ -306,19 +315,20 @@ seedfarmer seedkit destroy myproject --region us-east-1
 
 The seedkit follows a consistent naming pattern:
 
-  - **Stack Name**: `aws-codeseeder-<project-name>`
-  - **Resources**: Prefixed with `codeseeder-<project>` name for identification
-  - **S3 Bucket**: `codeseeder-<project>-<account>-<hash>`
+- **Stack Name**: `aws-codeseeder-<project-name>`
+- **Resources**: Prefixed with `codeseeder-<project>` name for identification
+- **S3 Bucket**: `codeseeder-<project>-<account>-<hash>`
 
 Example for a project named "data-platform":
 
-  - Stack: `aws-codeseeder-data-platform`
-  - CodeBuild Project: `codeseeder-data-platform`
-  - S3 Bucket: `codeseeder-data-platform-123456789012-abc123`
+- Stack: `aws-codeseeder-data-platform`
+- CodeBuild Project: `codeseeder-data-platform`
+- S3 Bucket: `codeseeder-data-platform-123456789012-abc123`
 
 ### Seedkit Configuration
 
 #### VPC Configuration
+
 For modules requiring private network access:
 
 ```yaml
@@ -338,6 +348,7 @@ targetAccountMappings:
 ```
 
 #### Permissions Boundaries
+
 Apply permissions boundaries to seedkit roles:
 
 ```yaml
@@ -351,9 +362,11 @@ targetAccountMappings:
 ### Seedkit Lifecycle Management
 
 #### Updates
+
 The seedkit is not automatically updated.  A manual update is requested via `--update-seedkit` flag when using the `seedfarmer seedkit` CLI.  This is to prevent accidential updates when changing SeedFarmer versions, or if making customizations to the seedkit artifacts (ex. the managed policy).
 
 #### Deletion
+
 The seedkit can be destroyed via the `seedfarmer destroy` CLI, but it is not discriminate (it does no checking of dependencies).
 
 ```bash
@@ -372,29 +385,28 @@ seedfarmer destroy my-deployment --remove-seedkit
 
 ## Seed-Farmer Artifacts
 
-
-For each account / region, Seed-Farmer will also deploy an S3 Bucket to store the bundled code used for each successfully deployed module.  This bundle is the exact code used to deploy and is to support the deletion of the module.  Once the module is destroyed, the bundled code is deleted. 
+For each account / region, Seed-Farmer will also deploy an S3 Bucket to store the bundled code used for each successfully deployed module.  This bundle is the exact code used to deploy and is to support the deletion of the module.  Once the module is destroyed, the bundled code is deleted.
 
 ### What are Seed-Farmer Artifacts?
+
 The Seed-Farmer artifacts are comprised of a Cloudformation stack that contains the definition of the S3 bucket and an S3 bucket policy.
 
 ### Seed-Farmer Artifacts Naming Convention
 
 The artifacts follow a consistent naming pattern:
 
-  - **Stack Name**: `seedfarmer-<project-name>-artifacts`
-  - **S3 Bucket**: `seedfarmer-<project>-<region>-<account>-<hash>-no-delete`
-  - **S3 Bucket Policy**: `seedfarmer-<project>-<region>-<account>-<hash>-no-delete`
- 
+- **Stack Name**: `seedfarmer-<project-name>-artifacts`
+- **S3 Bucket**: `seedfarmer-<project>-<region>-<account>-<hash>-no-delete`
+- **S3 Bucket Policy**: `seedfarmer-<project>-<region>-<account>-<hash>-no-delete`
 
 Example for a project named "data-platform":
 
-  - Stack: `seedfarmer-data-platform-artifacts`
-  - S3 Bucket: `seedfarmer-data-platform-us-east-1-123456789012-abc123-no-delete`
-  - S3 Bucket Policy: `seedfarmer-data-platform-us-east-1-123456789012-abc123-no-delete`
+- Stack: `seedfarmer-data-platform-artifacts`
+- S3 Bucket: `seedfarmer-data-platform-us-east-1-123456789012-abc123-no-delete`
+- S3 Bucket Policy: `seedfarmer-data-platform-us-east-1-123456789012-abc123-no-delete`
 
 Seed-Farmer will deploy this stack in each account / region that is configured.
-Seed-Farmer will delete this stack if determined that there are no more deployments using it. 
+Seed-Farmer will delete this stack if determined that there are no more deployments using it.
 
 ## State Management
 
@@ -405,16 +417,6 @@ Seed-Farmer stores deployment state in AWS Systems Manager Parameter Store. This
 - Module outputs
 
 This state management allows Seed-Farmer to track what has been deployed and detect changes that require redeployment.
-
-## Dependency Management
-
-Seed-Farmer has a shared-responsibility model for dependency management of modules. It includes guardrails to:
-
-- Prevent deletion of modules that have downstream modules dependent on them
-- Prevent circular references of modules
-
-However, it is up to the end user to be aware of and manage the relationships between modules to assess the impact of changes to modules via redeployment.
-
 
 ## Conclusion
 

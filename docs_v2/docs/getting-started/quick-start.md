@@ -39,6 +39,7 @@ A default project structure is provided.
     └── seedfarmer.yaml
 
 ```
+
 The is a valid project structure with `seedfarmer.yaml` at the root of the project.  All references to filepaths are relative to `seedfarmer.yaml`.
 
 The `modules` , `manifests` , and `resources` directories are only for logical separation and can be used at discretion.  In this sample case, they will not be needed. But the `deployment.yaml` is critical for use.  We will move that up to be parallel with `seedfarmer.yaml`, and remove the extra directories.
@@ -49,6 +50,7 @@ cd myproject
 mv manifests/examples/deployment.yaml .
 rm -rf manifests modules resources
 ```
+
 The resulting structure now looks like this:
 
 ```bash
@@ -89,11 +91,13 @@ targetAccountMappings:
 In the `deployment.yaml` a module manifest `simple-modules.yaml` was referred.  It creates the module configuration that we want to deploy.  We will deploy one module, the module code will be sourced from a [public module repository](../modules/idf-modules/index.md).
 
 Add the new module manifest.
+
 ```bash
 touch simple-modules.yaml
 ```
 
 Populate it with a module definition.
+
 ```yaml
 name: simplebucket
 path: git::https://github.com/awslabs/idf-modules.git//modules/storage/buckets?ref=release/1.13.0&depth=1
@@ -103,6 +107,7 @@ parameters:
   - name: RetentionType
     value: DESTROY
 ```
+
 The above module definition will deploy an S3 bucket in the target account.  The code is pull directly from the public IDF Github repository.
 
 ```bash
@@ -113,10 +118,10 @@ The above module definition will deploy an S3 bucket in the target account.  The
     └── simple-modules.yaml
 ```
 
-
 ## Deploy the Sample Project
 
 Now the deployment is ready for deployment.
+
 ```bash
 seedfarmer apply deployment.yaml
 ```
@@ -124,6 +129,7 @@ seedfarmer apply deployment.yaml
 Since this is the first deployment for the project `myproject`, SeedFarmer will add the necessary artifacts to support the project (a generic [module role](../concepts/architecture.md/#3-module-role), the [SeedKit](../concepts/architecture.md#seedkit-infrastructure), and a [SeedFarmer Artifacts](../concepts/architecture.md/#seed-farmer-artifacts) bucket).  These items are created once and reused by all deployments in the project.
 
 You should see somethign similar to:
+
 ```bash
 
 Modules Deployed: verysimple                                
@@ -152,7 +158,6 @@ Names
 └────────────┘
 ```
 
-
 ```bash
 seedfarmer list modules -d verysimple 
 
@@ -172,6 +177,7 @@ seedfarmer list allmodledata -d verysimple | jq .
 ```
 
 This returns all the module metadata:
+
 ```json
 {
   "group1-simplebucket": {
@@ -188,7 +194,6 @@ This returns all the module metadata:
   }
 }
 ```
-
 
 ## Clean Up
 
@@ -207,8 +212,6 @@ Modules Destroyed: verysimple
 ```
 
 This will destroy all the modules in the deployment in the reverse order of their deployment.
-
-
 
 ## Next Steps
 

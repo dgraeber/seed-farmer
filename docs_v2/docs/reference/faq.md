@@ -284,10 +284,13 @@ Seed-Farmer automatically deploys the seedkit during the first deployment to eac
 
 1. Let Seed-Farmer automatically deploy it during your next `seedfarmer apply`
 2. Manually deploy the seedkit:
+
    ```bash
    seedfarmer seedkit deploy myproject --region us-east-1
    ```
+
 3. If the seedkit is corrupted, destroy and redeploy it:
+  
    ```bash
    seedfarmer seedkit destroy myproject --region us-east-1
    seedfarmer seedkit deploy myproject --region us-east-1

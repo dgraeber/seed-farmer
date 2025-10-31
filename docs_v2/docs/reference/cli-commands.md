@@ -35,7 +35,6 @@ Commands:
 
 ```
 
-
 ## Bootstrap Commands
 
 These commands are used to bootstrap the toolchain and target accounts.
@@ -50,7 +49,6 @@ seedfarmer bootstrap toolchain \
   --trusted-principal PRINCIPAL_ARN
 ```
 
-
 ### bootstrap target
 
 Bootstrap a target account with the necessary IAM roles and permissions.
@@ -62,9 +60,8 @@ seedfarmer bootstrap target \
 ```
 
 !!! note "Bootstrap Both Toolchain and Target Accounts"
-    When bootsrapping a single account as both the toolchain account and the target account, use the `--as-target` command: <br>
+    When bootsrapping a single account as both the toolchain account and the target account, use the `--as-target` command: <br\>
     `seedfarmer bootstrap toolchain --project PROJECT_NAME --trusted-principal PRINCIPAL_ARN --as-target`
-
 
 ## Init Commands
 
@@ -84,7 +81,6 @@ Initialize a new module.
 seedfarmer init module 
 ```
 
-
 ## Deployment Commands
 
 These commands are used to deploy and destroy a deployment.  
@@ -97,7 +93,6 @@ Apply a deployment manifest to deploy modules.
 seedfarmer apply MANIFEST_PATH 
 ```
 
-
 ### destroy
 
 Destroy a deployment.
@@ -109,7 +104,6 @@ seedfarmer destroy DEPLOYMENT_NAME
 ## List Commands
 
 The commands are frequently used to interrogate deployments and modules.  It is recommended to explore these commands as they do not alter the deployments.
-
 
 !!! warning "Toolchain Region"
     The toolchain account is region-specific.  If you cannot get your deployment or module information, be sure to pass the `--region` of the toolchain account to assure SeedFarmer interrogates the proper region.
@@ -140,7 +134,6 @@ Deploy a seedkit in the specified account and region.
 seedfarmer seedkit deploy PROJECT_NAME 
 ```
 
-
 ### seedkit destroy
 
 Destroy a seedkit in the specified account and region.
@@ -156,10 +149,10 @@ These commands help manage metadata for modules.
 !!! warning "Only in deployspec.yaml"
     These commands will only work when executed in the `deployspec.yaml`.  
 
-
 ### metadata add
- 
+
 Module metadata can be augmented with additional data.  This is the recommended path for Terraform modules.
+
 ```bash
 seedfarmer metadata add
 ```
@@ -175,16 +168,19 @@ seedfarmer metadata convert --file FILE
 ### metadata depmod
 
 Get the fully resolved deployment name of the module.
+
 ```bash
+
 seedfarmer metadata depmod
+
 ```
 
 ### metadata paramvalue
 
-Get the parameter value based on the suffix. 
+Get the parameter value based on the suffix.
 
 ```bash
+
 seedfarmer metadata paramvalue --suffix SUFFIX
+
 ```
-
-

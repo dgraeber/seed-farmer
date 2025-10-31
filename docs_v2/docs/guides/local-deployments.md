@@ -27,11 +27,13 @@ Local deployments execute your module code via the deployspec using Docker conta
 Before you can deploy locally, ensure you have:
 
 ### Required Software
+
 - **Docker**: Must be installed and running on your local machine
 - **Seed-Farmer**: Installed via pip (`pip install seed-farmer`)
 - **AWS CLI**: Configured with appropriate credentials
 
 ### AWS Setup
+
 - **AWS credentials**: Configured for the target account
 - **AWS CDK bootstrap**: Completed in the target account/region
 - **Seed-Farmer bootstrap**: Toolchain and target accounts bootstrapped
@@ -63,7 +65,6 @@ These images are required for using Local Deployments:
 !!! info "CodeBuild Agent"
     Local deployments use Docker to simulate the AWS CodeBuild environment. For more information about CodeBuild's local execution capabilities, see the [AWS CodeBuild Agent documentation](https://docs.aws.amazon.com/codebuild/latest/userguide/use-codebuild-agent.html).
 
-
 ## Environment Variables
 
 Create an `.env` file to store environment variables needed for your deployment:
@@ -74,9 +75,10 @@ echo PRIMARY_ACCOUNT=210987654321 >> .env
 echo BUCKET_NAME=loggingbucket >> .env
 ```
 
-
 ## Authentication
+
 Seed-Farmer local deployments use AWS IAM for authentication, including [AWS CLI profiles](https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-files.html#cli-configure-files-format-profile) and temporary security credentials via [AWS Session credentials](https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-envvars.html). For example, the following can be set in the active session or in the environment file:
+
 ```bash
 export AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
 export AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
@@ -87,7 +89,6 @@ export AWS_REGION=us-east-1
 ## Single Account/Region Limitation
 
 **Important**: Local deployments are limited to a **single AWS account and region**. This is a fundamental constraint of the local deployment architecture.
-
 
 ### Automatic Region Override
 
@@ -112,8 +113,6 @@ targetAccountMappings:
 ```
 
 During local deployment, all modules will deploy to your current AWS session's region (e.g., `us-west-2` if that's your configured region).
-
-
 
 ## Local Deployment Process
 

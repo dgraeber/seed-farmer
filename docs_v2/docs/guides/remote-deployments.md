@@ -18,10 +18,10 @@ When you run `seedfarmer apply`, Seed-Farmer orchestrates deployments through AW
 
 Seed-Farmer creates a deployment bundle containing:
 
-  - Your module's source code
-  - Data files (if specified)
-  - Project configuration (`seedfarmer.yaml`)
-  - Support scripts for mirrors and Docker credentials
+- Your module's source code
+- Data files (if specified)
+- Project configuration (`seedfarmer.yaml`)
+- Support scripts for mirrors and Docker credentials
 
 ### 2. CodeBuild Project Execution
 
@@ -44,12 +44,12 @@ CodeBuild environments are automatically configured with:
 
 ## AWS CodeBuild Integration
 
-
 ### Build Images
 
 Seed-Farmer supports various CodeBuild images:
 
 #### Default Image
+
 - **Image**: `aws/codebuild/amazonlinux2-x86_64-standard:5.0`
 - **Runtime**: Amazon Linux 2 with Python 3.11
 - **Tools**: Pre-installed AWS CLI, Docker, common build tools
@@ -59,6 +59,7 @@ Seed-Farmer supports various CodeBuild images:
 You can override the build image at different levels:
 
 **Global Override** (in deployment manifest):
+
 ```yaml
 name: my-deployment
 toolchainRegion: us-west-2
@@ -66,6 +67,7 @@ codebuildImage: aws/codebuild/amazonlinux2-x86_64-standard:4.0
 ```
 
 **Module-Specific Override** (in module manifest):
+
 ```yaml
 name: my-module
 path: modules/compute/eks/
@@ -92,6 +94,7 @@ build_type: BUILD_GENERAL1_LARGE
 ```
 
 **Available Options**:
+
 - `BUILD_GENERAL1_SMALL`: 3 GB memory, 2 vCPUs
 - `BUILD_GENERAL1_MEDIUM`: 7 GB memory, 4 vCPUs
 - `BUILD_GENERAL1_LARGE`: 15 GB memory, 8 vCPUs
@@ -121,6 +124,7 @@ pypiMirrorSecret: prod/pypi-credentials
 For authenticated PyPI mirrors, store credentials in AWS Secrets Manager:
 
 **Secret Structure**:
+
 ```json
 {
   "pypi": {
@@ -132,6 +136,7 @@ For authenticated PyPI mirrors, store credentials in AWS Secrets Manager:
 
 **Multiple Mirror Support**:
 You can store multiple mirror credentials in a single secret:
+
 ```json
 {
   "pypi": {
@@ -147,6 +152,7 @@ You can store multiple mirror credentials in a single secret:
 
 **Using Specific Keys**:
 Reference specific keys within a secret using the `::` syntax:
+
 ```yaml
 pypiMirrorSecret: prod/mirror-credentials::artifactory
 ```
@@ -173,6 +179,7 @@ npmMirrorSecret: prod/npm-credentials
 For authenticated NPM mirrors, store credentials in AWS Secrets Manager:
 
 **Basic Authentication**:
+
 ```json
 {
   "npm": {
@@ -183,6 +190,7 @@ For authenticated NPM mirrors, store credentials in AWS Secrets Manager:
 ```
 
 **Token-Based Authentication**:
+
 ```json
 {
   "npm": {
@@ -192,6 +200,7 @@ For authenticated NPM mirrors, store credentials in AWS Secrets Manager:
 ```
 
 **Multiple Registry Support**:
+
 ```json
 {
   "npm": {
@@ -205,6 +214,7 @@ For authenticated NPM mirrors, store credentials in AWS Secrets Manager:
 ```
 
 **Using Specific Keys**:
+
 ```yaml
 npmMirrorSecret: prod/registry-credentials::artifactory
 ```
@@ -214,6 +224,7 @@ npmMirrorSecret: prod/registry-credentials::artifactory
 Mirror secrets can be configured at multiple levels with inheritance:
 
 **Global Level** (applies to all accounts/regions):
+
 ```yaml
 name: my-deployment
 pypiMirror: https://pypi.internal.com/simple/
@@ -223,6 +234,7 @@ npmMirrorSecret: global/npm-credentials
 ```
 
 **Account Level** (overrides global):
+
 ```yaml
 targetAccountMappings:
   - alias: production
@@ -232,6 +244,7 @@ targetAccountMappings:
 ```
 
 **Region Level** (overrides account and global):
+
 ```yaml
 targetAccountMappings:
   - alias: production
@@ -243,6 +256,7 @@ targetAccountMappings:
 ```
 
 **Module Level** (overrides all others):
+
 ```yaml
 name: my-module
 path: modules/compute/eks/
@@ -254,9 +268,9 @@ npmMirrorSecret: module-specific/npm-credentials
 
 Seed-Farmer automatically configures CodeArtifact when available:
 
-  - Detects CodeArtifact domain and repository from seedkit outputs
-  - Configures pip and uv to use CodeArtifact
-  - Sets up authentication tokens automatically
+- Detects CodeArtifact domain and repository from seedkit outputs
+- Configures pip and uv to use CodeArtifact
+- Sets up authentication tokens automatically
 
 ## Docker Registry Authentication
 
@@ -264,9 +278,9 @@ Seed-Farmer automatically configures CodeArtifact when available:
 
 Seed-Farmer automatically handles Docker authentication:
 
-  - AWS ECR login for the target account
-  - Docker Hub authentication (if credentials provided)
-  - Custom registry authentication via secrets
+- AWS ECR login for the target account
+- Docker Hub authentication (if credentials provided)
+- Custom registry authentication via secrets
 
 ### Docker Credentials Secret
 
@@ -282,6 +296,7 @@ targetAccountMappings:
 ```
 
 The secret should contain:
+
 ```json
 {
   "username": "your-docker-username",

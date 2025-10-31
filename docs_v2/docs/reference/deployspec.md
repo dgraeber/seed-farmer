@@ -97,6 +97,7 @@ parameters:
 ```
 
 **Available in deployspec as**:
+
 ```bash
 SEEDFARMER_PARAMETER_VPC_ID=vpc-12345678
 SEEDFARMER_PARAMETER_INSTANCE_TYPE=t3.medium
@@ -116,6 +117,7 @@ Seed-Farmer converts parameter names to environment variables using these transf
 | Mixed styles        | `some-Complex_Name` | `SEEDFARMER_PARAMETER_SOME_COMPLEX_NAME` |
 
 **Key Points**:
+
 - All parameter names are converted to **UPPER_SNAKE_CASE**
 - Hyphens (`-`), underscores (`_`), and camelCase boundaries become underscores
 - Generic modules use the `SEEDFARMER_PARAMETER_` prefix
@@ -186,6 +188,7 @@ build_type: BUILD_GENERAL1_LARGE
 ```
 
 **Available options**:
+
 - `BUILD_GENERAL1_SMALL`: 3 GB memory, 2 vCPUs
 - `BUILD_GENERAL1_MEDIUM`: 7 GB memory, 4 vCPUs  
 - `BUILD_GENERAL1_LARGE`: 15 GB memory, 8 vCPUs
@@ -216,6 +219,7 @@ Seed-Farmer uses a metadata system that allows modules to export outputs that ot
 When your deployspec runs, Seed-Farmer automatically creates a metadata file that your module writes to.
 
 **For Generic Modules (Default)**:
+
 - Environment variable: `SEEDFARMER_MODULE_METADATA`
 - File location: `module/SEEDFARMER_MODULE_METADATA`
 
@@ -307,9 +311,9 @@ The `seedfarmer metadata convert` command expects the CDK outputs file to have t
 
 **Critical Requirements:**
 
-  - `project-deployment-module` is the full module deployment name (format: `{project}-{deployment}-{module}`)
-  - The `metadata` field must contain a **JSON string** (not a JSON object)
-  - The JSON string contains your actual metadata values as a serialized JSON object
+- `project-deployment-module` is the full module deployment name (format: `{project}-{deployment}-{module}`)
+- The `metadata` field must contain a **JSON string** (not a JSON object)
+- The JSON string contains your actual metadata values as a serialized JSON object
 
 ### Important Metadata Guidelines
 
@@ -446,7 +450,6 @@ deploy:
     - Validate your JSON using `jq` or online JSON validators
     - Escape quotes properly in shell commands  
     - Use single quotes around JSON strings in YAML
-
 
 ## Complete Examples
 
@@ -610,4 +613,3 @@ publishGenericEnvVariables: true
 3. **Validate input parameters** to prevent injection attacks
 4. **Use least-privilege IAM roles** in your modulestack.yaml
 5. **Sanitize user inputs** before using them in commands
-

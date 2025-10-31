@@ -15,12 +15,11 @@ Before installing Seed-Farmer, ensure you have the following prerequisites:
 
 SeedFarmer supports [uv](https://docs.astral.sh/uv/) and [pip](https://pypi.org/project/pip/) for installation for use.
 
-It is recommended to [install uv](https://docs.astral.sh/uv/getting-started/installation/) as the primary installation tool. 
+It is recommended to [install uv](https://docs.astral.sh/uv/getting-started/installation/) as the primary installation tool.
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
-
 
 ### Using uv
 
@@ -32,9 +31,10 @@ Install Seed-Farmer as a tool.
 uv tool install --python 3.13 seed-farmer 
 
 ```
+
 You can pin to a particular version by referring to the version in the install ( see the [pypi release history](https://pypi.org/project/seed-farmer/#history) )
 
-### Using pip 
+### Using pip
 
 Install Seed-Farmer using [pip](https://pypi.org/project/pip/)
 
@@ -77,12 +77,11 @@ This should display the version of Seed-Farmer that you have installed.
 
 ### AWS CLI and Credentials
 
-Install the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) and configure your perferred method of [AWS Credentials](https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-files.html). 
+Install the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) and configure your perferred method of [AWS Credentials](https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-files.html).
 
 ### AWS CDK
 
 Run the [AWS CDK Bootstrap](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) in each target account using the [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/getting-started.html).
-
 
 ## Next Steps
 
