@@ -76,11 +76,3 @@ path: archive::https://github.com/awslabs/idf-modules/archive/refs/tags/v1.6.0.z
 
 ```
 
-
-
-
-## Archive Secrets
-Coming Soon
-
-## Mirror Secrets
-Coming Soon

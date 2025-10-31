@@ -558,30 +558,6 @@ deploy:
     - Escape quotes properly in shell commands  
     - Use single quotes around JSON strings in YAML
 
-#### Debugging Metadata
-
-You can debug metadata issues by examining the files and environment variables:
-
-```yaml
-deploy:
-  phases:
-    post_build:
-      commands:
-        # Debug: Show metadata environment variable name
-        - echo "Metadata env var: $SEEDFARMER_MODULE_METADATA"
-        
-        # Debug: Show metadata file location
-        - echo "Metadata file: module/$SEEDFARMER_MODULE_METADATA"
-        
-        # Debug: Show current metadata content
-        - cat module/$SEEDFARMER_MODULE_METADATA || echo "No metadata file found"
-        
-        # Add your metadata
-        - seedfarmer metadata add -k VpcId -v vpc-12345678
-        
-        # Debug: Show final metadata content
-        - cat module/$SEEDFARMER_MODULE_METADATA
-```
 
 ## Complete Examples
 
@@ -625,45 +601,56 @@ publishGenericEnvVariables: true
 ### Terraform Module
 
 ```yaml
+publishGenericEnvVariables: true
 deploy:
   phases:
     install:
       commands:
-        - wget https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
-        - unzip terraform_1.5.0_linux_amd64.zip
+        - TERRAFORM_VERSION=1.13.3
+        - wget -q https://releases.hashicorp.com/terraform/"$TERRAFORM_VERSION"/terraform_"$TERRAFORM_VERSION"_linux_amd64.zip
+        - unzip terraform_"$TERRAFORM_VERSION"_linux_amd64.zip
         - mv terraform /usr/local/bin/
-    pre_build:
-      commands:
-        - terraform init
-        - echo "VPC ID: $SEEDFARMER_PARAMETER_VPC_ID"
     build:
       commands:
-        - terraform plan -var="vpc_id=$SEEDFARMER_PARAMETER_VPC_ID"
-        - terraform apply -auto-approve -var="vpc_id=$SEEDFARMER_PARAMETER_VPC_ID"
-        - terraform output -json > terraform-outputs.json
+        - > 
+          terraform init -backend-config="bucket=${SEEDFARMER_PARAMETER_TFSTATE_BUCKET_NAME}" 
+          -backend-config="key=opensearch-serverless-module/terraform.tfstate" 
+          -backend-config="region=${AWS_DEFAULT_REGION}"
+        - >
+          terraform plan -input=false -out tf.plan
+          -var="collection_name=$SEEDFARMER_PARAMETER_COLLECTION_NAME"
+          -var="s3_bucket_prefix=$SEEDFARMER_PARAMETER_S3_BUCKET_PREFIX"
+        - >
+          terraform apply -auto-approve
+          -var="collection_name=$SEEDFARMER_PARAMETER_COLLECTION_NAME"
+          -var="s3_bucket_prefix=$SEEDFARMER_PARAMETER_S3_BUCKET_PREFIX"
+        - terraform output -json > tf-exports.json
+        - seedfarmer metadata add -k collection_arn -v $(terraform output -raw collection_arn)
+        - seedfarmer metadata add -k collection_name -v $(terraform output -raw collection_name)
+        - seedfarmer metadata add -k s3_bucket_arn -v $(terraform output -raw s3_bucket_arn)
     post_build:
       commands:
-        - |
-          # Convert Terraform outputs to Seed-Farmer metadata
-          OUTPUTS=$(cat terraform-outputs.json)
-          seedfarmer metadata add -j "$OUTPUTS"
-
+        - echo "OpenSearch Serverless module deployment successful"
 destroy:
   phases:
     install:
       commands:
-        - wget https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
-        - unzip terraform_1.5.0_linux_amd64.zip
+        - TERRAFORM_VERSION=1.13.3
+        - wget -q https://releases.hashicorp.com/terraform/"$TERRAFORM_VERSION"/terraform_"$TERRAFORM_VERSION"_linux_amd64.zip
+        - unzip terraform_"$TERRAFORM_VERSION"_linux_amd64.zip
         - mv terraform /usr/local/bin/
-    pre_build:
-      commands:
-        - terraform init
     build:
       commands:
-        - terraform destroy -auto-approve -var="vpc_id=$SEEDFARMER_PARAMETER_VPC_ID"
+        - > 
+          terraform init -backend-config="bucket=${SEEDFARMER_PARAMETER_TFSTATE_BUCKET_NAME}" 
+          -backend-config="key=opensearch-serverless-module/terraform.tfstate" 
+          -backend-config="region=${AWS_DEFAULT_REGION}"
+        - terraform destroy -auto-approve
+    post_build:
+      commands:
+        - echo "OpenSearch Serverless module destruction successful"
+build_type: BUILD_GENERAL1_MEDIUM
 
-build_type: BUILD_GENERAL1_SMALL
-publishGenericEnvVariables: true
 ```
 
 ### CloudFormation Module
@@ -753,7 +740,6 @@ deploy:
 2. **Use consistent naming conventions** for exported metadata
 3. **Include both simple values and complex objects** as needed
 4. **Document exported metadata** in your module's README
-5. **Test metadata consumption** by dependent modules
 
 ### Security Considerations
 
@@ -763,10 +749,3 @@ deploy:
 4. **Use least-privilege IAM roles** in your modulestack.yaml
 5. **Sanitize user inputs** before using them in commands
 
-### Performance Optimization
-
-1. **Choose appropriate build types** based on your module's resource needs
-2. **Cache dependencies** when possible to speed up builds
-3. **Use parallel operations** where safe to do so
-4. **Minimize network calls** during deployment
-5. **Clean up temporary files** to avoid storage issues

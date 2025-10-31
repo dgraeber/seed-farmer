@@ -154,7 +154,7 @@ These restrictions help maintain security by preventing potential privilege esca
 
 ## Seedkit Infrastructure
 
-In addition to the IAM roles created during bootstrapping, Seed-Farmer automatically deploys [Seedkit Infrastructure]((../concepts/architecture.md#seedkit-infrastructure)) in each target account and region during your first deployment. The seedkit provides the core infrastructure components needed for module deployments:
+In addition to the IAM roles created during bootstrapping, Seed-Farmer automatically deploys [Seedkit Infrastructure](../concepts/architecture.md#seedkit-infrastructure) in each target account and region during your first deployment. The seedkit provides the core infrastructure components needed for module deployments:
 
 - **AWS CodeBuild Project**: Executes module deployments
 - **S3 Bucket**: Stores deployment bundles and artifacts  
