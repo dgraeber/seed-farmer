@@ -105,6 +105,7 @@ nav:
     - Manifests: reference/manifests.md
     - Deployspec: reference/deployspec.md
     - Conventions: reference/conventions.md
+    - Glossary: reference/glossary.md
     - FAQ: reference/faq.md
   - Sequence Diagrams: 
     - sequence/index.md
