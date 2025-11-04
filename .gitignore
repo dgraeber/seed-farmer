@@ -401,3 +401,6 @@ scriptslocal/
 docs_v2/site
 docs_v2/generated_diagrams/*
 docs_v2/diagrams/*
+
+backup/
+.kiro/
